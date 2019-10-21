@@ -1,0 +1,15 @@
+{
+  "name": "bed-light",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "docker-compose up --build"
+  },
+  "author": {
+    "name": "Momme Jürgensen",
+    "email": "momme@juergensen.me"
+  },
+  "license": "ISC"
+}
