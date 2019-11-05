@@ -20,11 +20,9 @@ var strips = [
   }
 ]
 
-var mode = "MANUAL"
-
 for (const key in Modes) {
   if (Modes.hasOwnProperty(key)) {
-    Modes[key] = new Modes[key](strips, sendBuffer)
+    Modes[key] = new Modes[key](strips, sendBuffer, io)
   }
 }
 
@@ -142,11 +140,12 @@ function updateStripsByBuffer(buffer) {
 
 io.on('connection', function(socket){
 
-  let mode = ''
-
+  let mode = {  }
+  let existingModes = []
   // Add Modes events
   Object.keys(Modes).forEach((key) => {
-    if (Modes[key].activated) mode = key
+    existingModes.push(Modes[key].clientInfo)
+    if (Modes[key].activated) mode = Modes[key].clientInfo;
     var events = Modes[key].events()
     Object.keys(events).forEach(k => {
       socket.on(k, events[k])
@@ -155,6 +154,7 @@ io.on('connection', function(socket){
 
   socket.emit('strips', strips)
   socket.emit('mode', mode)
+  socket.emit('existingModes', existingModes)
   
 })
 

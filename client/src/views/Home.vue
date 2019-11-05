@@ -1,18 +1,32 @@
 <template>
-  <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div>
+    <v-col class="d-flex" cols="12" sm="6">
+      <v-select
+        :items="modeNamesAndIds"
+        label="Mode"
+        :value="modeId"
+        @input="setMode"
+        outlined
+      />
+    </v-col>
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
   name: 'home',
-  components: {
-    HelloWorld
+  computed: {
+    ...mapGetters([
+      'modeId',
+      'modeNamesAndIds'
+    ])
+  },
+  methods: {
+    ...mapActions([
+      'setMode'
+    ])
   }
 }
 </script>

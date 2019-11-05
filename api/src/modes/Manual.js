@@ -1,15 +1,21 @@
 module.exports = class Manual {
-  constructor(strips, sendBuffer) {
+  constructor(strips, sendBuffer, io) {
     this.strips = strips
     this.sendBuffer = sendBuffer
-    this.activated = true
+    this.io = io
+    this.activated = false
+    this.clientInfo = {
+      name: 'Manual',
+      description: 'You get the force!',
+      id: 'MANUAL'
+    }
   }
 
   events () {
     return {
       'setMode': n => this.checkMode(n),
-      'fillAllStrips': n => { if(this.activated )this.fillAllStrips(n) },
-      'fillPixels': n => { if(this.activated )this.fillPixels(n) }
+      'fillAllStrips': n => { if(this.activated ) this.fillAllStrips(n) },
+      'fillPixels': n => { if(this.activated ) this.fillPixels(n) }
     }
   }
 
@@ -45,8 +51,9 @@ module.exports = class Manual {
   }
 
   checkMode (payload) {
-    this.activated = payload.toUpperCase() === 'MANUAL'
-    console.log(this.activated)
+    this.activated = payload.toUpperCase() === this.clientInfo.id
+    if (this.activated) this.io.emit('mode', this.clientInfo)
+    else return
   }
 
 } 

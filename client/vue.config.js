@@ -7,6 +7,8 @@ module.exports = {
         pathRewrite: { '^/api': '' }
       }
     }
-  }
-
+  },
+  transpileDependencies: [
+    'vuetify'
+  ]
 }

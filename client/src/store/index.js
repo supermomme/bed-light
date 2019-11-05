@@ -10,7 +10,8 @@ Vue.use(Vuex)
 const store = new Vuex.Store({
   state: {
     strips: [ ],
-    mode: ''
+    mode: { },
+    existingModes: [ ]
   },
   mutations: {
     setStrips (state, n) {
@@ -28,9 +29,30 @@ const store = new Vuex.Store({
     },
     setMode (state, n) {
       state.mode = n
+    },
+    setExistingModes (state, n) {
+      state.existingModes = n
+    }
+  },
+  getters: {
+    modeId (state) {
+      return state.mode.id
+    },
+    modeNamesAndIds (state) {
+      return state.existingModes.reduce((prev, cur, index) => {
+        prev.push({
+          text: cur.name,
+          value: cur.id
+        })
+        return prev
+      }, [])
     }
   },
   actions: {
+    setMode ({ commit }, n) {
+      console.log('SETMODE', n)
+      io.emit('setMode', n)
+    }
   },
   modules: {
   }
@@ -39,7 +61,7 @@ const store = new Vuex.Store({
 io.on('connect', () => {
   console.log('Connected!')
   // io.emit('setMode', 'TEST')
-  io.emit('fillAllStrips', [ 1, 1, 1 ])
+  // io.emit('fillAllStrips', [ 1, 1, 1 ])
   // io.emit('fillPixels', [
   //   { strip: 1, address: 25, red: 0, green: 255, blue: 255 },
   //   { strip: 1, address: 26, red: 255, green: 0, blue: 255 },
@@ -57,8 +79,12 @@ io.on('strips', (strips) => {
   store.commit('setStrips', strips)
 })
 
-io.on('mode', (strips) => {
-  store.commit('setMode', strips)
+io.on('mode', (mode) => {
+  store.commit('setMode', mode)
+})
+
+io.on('existingModes', (modes) => {
+  store.commit('setExistingModes', modes)
 })
 
 io.on('stripData', (strips) => {
