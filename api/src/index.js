@@ -4,10 +4,11 @@ const http = require('http').createServer(app);
 const dgram = require('dgram');
 const io = require('socket.io')(http);
 
-var PORT = 33333;
-var HOST = '10.0.80.21';
+var Modes = require('./modes')
+const PORT = 33333;
+const HOST = '10.0.80.21';
 
-var client = dgram.createSocket('udp4');
+const client = dgram.createSocket('udp4');
 var strips = [
   {
     name: "ONE",
@@ -18,6 +19,14 @@ var strips = [
     length: 60
   }
 ]
+
+var mode = "MANUAL"
+
+for (const key in Modes) {
+  if (Modes.hasOwnProperty(key)) {
+    Modes[key] = new Modes[key](strips, sendBuffer)
+  }
+}
 
 for (let f = 0; f < strips.length; f++) {
   strips[f].data = []
@@ -108,21 +117,46 @@ client.send(message, 0, message.length, PORT, HOST, function(err, bytes) {
 function sendBuffer(buffer) {
   client.send(buffer, 0, buffer.length, PORT, HOST, function(err, bytes) {
     if (err) throw err;
-    getStripByBuffer(buffer)
+    updateStripsByBuffer(buffer)
+    io.emit('stripData', getStripDataByBuffer(buffer))
   })
 }
 
-function getStripByBuffer(buffer) {
+function getStripDataByBuffer(buffer) {
+  let res = []
+  for (let i = 0; i < buffer.length/5; i++) {
+    if (res[buffer[i*5]] == undefined) res[buffer[i*5]] = []
+    res[buffer[i*5]][buffer[i*5+1]] = [ buffer[i*5+2], buffer[i*5+3], buffer[i*5+4] ]
+  }
+  return res
+}
+
+function updateStripsByBuffer(buffer) {
   for (let i = 0; i < buffer.length/5; i++) {
     strips[buffer[i*5]].data[buffer[i*5+1]] = [ buffer[i*5+2], buffer[i*5+3], buffer[i*5+4] ]
   }
+  return strips
 }
 
-// app.use(express.static(__dirname+'/../client'));
+
 
 io.on('connection', function(socket){
-  console.log('a user connected');
-});
+
+  let mode = ''
+
+  // Add Modes events
+  Object.keys(Modes).forEach((key) => {
+    if (Modes[key].activated) mode = key
+    var events = Modes[key].events()
+    Object.keys(events).forEach(k => {
+      socket.on(k, events[k])
+    })
+  })
+
+  socket.emit('strips', strips)
+  socket.emit('mode', mode)
+  
+})
 
 http.listen(3030, function(){
   console.log('listening on *:3030');
