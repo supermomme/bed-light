@@ -17,38 +17,36 @@ module.exports = class FullRandom {
   }
 
   update () {
-    if (!this.initilized) {
-      for(var i = this.pixels.length - 1; i >= 0; i--) {
-        if(this.pixels[i].r.isFinished() && this.pixels[i].g.isFinished() && this.pixels[i].b.isFinished()) {
-          this.pixels.splice(i, 1);
-        }
+    for(var i = this.pixels.length - 1; i >= 0; i--) {
+      if(this.pixels[i].r.isFinished() && this.pixels[i].g.isFinished() && this.pixels[i].b.isFinished()) {
+        this.pixels.splice(i, 1);
       }
+    }
 
-      let fadeout = Array.isArray(this.getConfig('fadeout')) ? this.randomMinMax(this.getConfig('fadeout')[0], this.getConfig('fadeout')[1]) : this.getConfig('fadeout')
-      let x = Math.round(Math.random()*(this.width - 1))
-      let y = Math.round(Math.random()*(this.height - 1))
+    let fadeout = Array.isArray(this.getConfig('fadeout')) ? this.randomMinMax(this.getConfig('fadeout')[0], this.getConfig('fadeout')[1]) : this.getConfig('fadeout')
+    let x = Math.round(Math.random()*(this.width - 1))
+    let y = Math.round(Math.random()*(this.height - 1))
 
-      let r = new Ramp(this.getRedColor())
-      r.go(0, fadeout, 'LINEAR', 'ONCEFORWARD')
-      let g = new Ramp(this.getGreenColor())
-      g.go(0, fadeout, 'LINEAR', 'ONCEFORWARD')
-      let b = new Ramp(this.getBlueColor())
-      b.go(0, fadeout, 'LINEAR', 'ONCEFORWARD')
+    let r = new Ramp(this.getRedColor())
+    r.go(0, fadeout, 'LINEAR', 'ONCEFORWARD')
+    let g = new Ramp(this.getGreenColor())
+    g.go(0, fadeout, 'LINEAR', 'ONCEFORWARD')
+    let b = new Ramp(this.getBlueColor())
+    b.go(0, fadeout, 'LINEAR', 'ONCEFORWARD')
 
-      if (this.waitFrames <= 0) {
-        this.pixels.push({ x, y, r, g, b })
-        this.waitFrames = Array.isArray(this.getConfig('waitFrames')) ? this.randomMinMax(this.getConfig('waitFrames')[0], this.getConfig('waitFrames')[1]) : this.getConfig('waitFrames')
-      } else {
-        this.waitFrames--
-      }
+    if (this.waitFrames <= 0) {
+      this.pixels.push({ x, y, r, g, b })
+      this.waitFrames = Array.isArray(this.getConfig('waitFrames')) ? this.randomMinMax(this.getConfig('waitFrames')[0], this.getConfig('waitFrames')[1]) : this.getConfig('waitFrames')
+    } else {
+      this.waitFrames--
+    }
 
-      return this.pixels.map(({x,y,r,g,b}) => ({
-          x,y,
-          r: r.update(),
-          g: g.update(),
-          b: b.update()
-      }))
-    } else return []
+    return this.pixels.map(({x,y,r,g,b}) => ({
+        x,y,
+        r: r.update(),
+        g: g.update(),
+        b: b.update()
+    }))
   }
 
   getConfig (conf) {

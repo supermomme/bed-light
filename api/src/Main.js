@@ -16,7 +16,7 @@ module.exports = class Main {
     this.modes = _modes
     this.matrices = _matrices.map(({bed, host, port, width, height}) => ({
       bed, host, port, width, height,
-      mode: new this.modes.FullRandom(width, height)
+      mode: new this.modes.Off(width, height)
     }))
     this.fps = _fps
     this.udpClient = dgram.createSocket('udp4')
