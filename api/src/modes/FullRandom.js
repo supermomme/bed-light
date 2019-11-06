@@ -5,10 +5,11 @@ module.exports = class FullRandom {
     this.width = _width
     this.height = _height
     this.defaultConfig = {
-      sub: 5,
+      fadeout: [ 700, 1300 ],
       waitFrames: [0, 30],
-      min: 0,
-      max: 255
+      colorR: [0, 255],
+      colorG: [0, 255],
+      colorB: [0, 255],
     }
     this.config = _config || this.defaultConfig
     this.pixels = []
@@ -18,28 +19,21 @@ module.exports = class FullRandom {
   update () {
     if (!this.initilized) {
       for(var i = this.pixels.length - 1; i >= 0; i--) {
-        if(this.pixels[i].r === 0 && this.pixels[i].g === 0 && this.pixels[i].b === 0) {
+        if(this.pixels[i].r.isFinished() && this.pixels[i].g.isFinished() && this.pixels[i].b.isFinished()) {
           this.pixels.splice(i, 1);
         }
       }
 
-      for (let i = 0; i < this.pixels.length; i++) {
-        this.pixels[i].r -= this.getConfig('sub')
-        if (this.pixels[i].r <= 0) this.pixels[i].r = 0
-
-        this.pixels[i].g -= this.getConfig('sub')
-        if (this.pixels[i].g <= 0) this.pixels[i].g = 0
-
-        this.pixels[i].b -= this.getConfig('sub')
-        if (this.pixels[i].b <= 0) this.pixels[i].b = 0
-
-      }
-
+      let fadeout = Array.isArray(this.getConfig('fadeout')) ? this.randomMinMax(this.getConfig('fadeout')[0], this.getConfig('fadeout')[1]) : this.getConfig('fadeout')
       let x = Math.round(Math.random()*(this.width - 1))
       let y = Math.round(Math.random()*(this.height - 1))
-      let r = this.randomMinMax(this.getConfig('min'), this.getConfig('max'))
-      let g = this.randomMinMax(this.getConfig('min'), this.getConfig('max'))
-      let b = this.randomMinMax(this.getConfig('min'), this.getConfig('max'))
+
+      let r = new Ramp(this.getRedColor())
+      r.go(0, fadeout, 'LINEAR', 'ONCEFORWARD')
+      let g = new Ramp(this.getGreenColor())
+      g.go(0, fadeout, 'LINEAR', 'ONCEFORWARD')
+      let b = new Ramp(this.getBlueColor())
+      b.go(0, fadeout, 'LINEAR', 'ONCEFORWARD')
 
       if (this.waitFrames <= 0) {
         this.pixels.push({ x, y, r, g, b })
@@ -48,12 +42,32 @@ module.exports = class FullRandom {
         this.waitFrames--
       }
 
-      return this.pixels
+      return this.pixels.map(({x,y,r,g,b}) => ({
+          x,y,
+          r: r.update(),
+          g: g.update(),
+          b: b.update()
+      }))
     } else return []
   }
 
   getConfig (conf) {
-    return this.config[conf] || this.defaultConfig[conf]
+    return this.config[conf] != undefined ? this.config[conf] : this.defaultConfig[conf]
+  }
+
+  getRedColor () {
+    let color = this.getConfig('colorR')
+    return Array.isArray(color) ? this.randomMinMax(color[0], color[1]) : color
+  }
+
+  getGreenColor () {
+    let color = this.getConfig('colorG')
+    return Array.isArray(color) ? this.randomMinMax(color[0], color[1]) : color
+  }
+
+  getBlueColor () {
+    let color = this.getConfig('colorB')
+    return Array.isArray(color) ? this.randomMinMax(color[0], color[1]) : color
   }
 
   randomMinMax(min, max) {
