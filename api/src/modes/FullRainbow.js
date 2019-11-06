@@ -5,8 +5,8 @@ module.exports = class FullRainbow {
     this.width = _width
     this.height = _height
     this.defaultConfig = {
-      brightness: 20,
-      cycleTime: 10000
+      brightness: 255,
+      cycleTime: 60000
     }
     this.config = _config || this.defaultConfig
     this.r = new Ramp(this.getConfig('brightness'))
@@ -21,31 +21,23 @@ module.exports = class FullRainbow {
     if(allFinished) {
       switch (this.nextPhase) {
         case 0:
-          this.g.go(this.getConfig('brightness'), this.getConfig('cycleTime')/6, 'LINEAR', 'ONCEFORWARD')
+          this.r.go(0, this.getConfig('cycleTime')/3, 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
+          this.g.go(this.getConfig('brightness'), this.getConfig('cycleTime')/3, 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
           this.nextPhase++
           break;
         case 1:
-          this.r.go(0, this.getConfig('cycleTime')/6, 'LINEAR', 'ONCEFORWARD')
+          this.g.go(0, this.getConfig('cycleTime')/3, 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
+          this.b.go(this.getConfig('brightness'), this.getConfig('cycleTime')/3, 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
           this.nextPhase++
           break;
         case 2:
-          this.b.go(this.getConfig('brightness'), this.getConfig('cycleTime')/6, 'LINEAR', 'ONCEFORWARD')
-          this.nextPhase++
-          break;
-        case 3:
-          this.g.go(0, this.getConfig('cycleTime')/6, 'LINEAR', 'ONCEFORWARD')
-          this.nextPhase++
-          break;
-        case 4:
-          this.r.go(this.getConfig('brightness'), this.getConfig('cycleTime')/6, 'LINEAR', 'ONCEFORWARD')
-          this.nextPhase++
-          break;
-        case 5:
-          this.b.go(0, this.getConfig('cycleTime')/6, 'LINEAR', 'ONCEFORWARD')
+          this.b.go(0, this.getConfig('cycleTime')/3, 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
+          this.r.go(this.getConfig('brightness'), this.getConfig('cycleTime')/3, 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
           this.nextPhase = 0
           break;
       
         default:
+          this.nextPhase = 0
           break;
       }
     }
