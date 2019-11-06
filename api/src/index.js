@@ -1,53 +1,57 @@
-const express = require('express');
-const app = express();
-const http = require('http').createServer(app);
-const dgram = require('dgram');
-const io = require('socket.io')(http);
+const Main = require('./Main')
 
-var Modes = require('./modes')
-const PORT = 33333;
-const HOST = '10.0.80.21';
+let main = new Main()
 
-const client = dgram.createSocket('udp4');
-var strips = [
-  {
-    name: "ONE",
-    length: 60
-  },
-  {
-    name: "TWO",
-    length: 60
-  }
-]
+// const express = require('express');
+// const app = express();
+// const http = require('http').createServer(app);
+// const dgram = require('dgram');
+// const io = require('socket.io')(http);
 
-for (const key in Modes) {
-  if (Modes.hasOwnProperty(key)) {
-    Modes[key] = new Modes[key](strips, sendBuffer, io)
-  }
-}
+// var Modes = require('./modes')
+// const PORT = 33333;
+// const HOST = '10.0.80.21';
 
-for (let f = 0; f < strips.length; f++) {
-  strips[f].data = []
-  for (let i = 0; i < strips[f].length; i++) {
-    strips[f].data[i] = [0,0,0]
-  }
-}
+// const client = dgram.createSocket('udp4');
+// var strips = [
+//   {
+//     name: "ONE",
+//     length: 60
+//   },
+//   {
+//     name: "TWO",
+//     length: 60
+//   }
+// ]
 
-let mes = Buffer.alloc(strips.reduce((prev, cur) => prev+cur.length, 0)*5)
-let offset = 0
-for (let f = 0; f < strips.length; f++) {
-  for (let i = 0; i < strips[f].data.length; i++) {
-    const [r,g,b] = strips[f].data[i];
-    const base = (i)*5+offset
-    mes.writeUInt8(f, base)
-    mes.writeUInt8(i, base+1)
-    mes.writeUInt8(r, base+2)
-    mes.writeUInt8(g, base+3)
-    mes.writeUInt8(b, base+4)
-  }
-  offset += strips[f].length*5
-}
-sendBuffer(mes)
+// for (const key in Modes) {
+//   if (Modes.hasOwnProperty(key)) {
+//     Modes[key] = new Modes[key](strips, sendBuffer, io)
+//   }
+// }
+
+// for (let f = 0; f < strips.length; f++) {
+//   strips[f].data = []
+//   for (let i = 0; i < strips[f].length; i++) {
+//     strips[f].data[i] = [0,0,0]
+//   }
+// }
+
+// let mes = Buffer.alloc(strips.reduce((prev, cur) => prev+cur.length, 0)*5)
+// let offset = 0
+// for (let f = 0; f < strips.length; f++) {
+//   for (let i = 0; i < strips[f].data.length; i++) {
+//     const [r,g,b] = strips[f].data[i];
+//     const base = (i)*5+offset
+//     mes.writeUInt8(f, base)
+//     mes.writeUInt8(i, base+1)
+//     mes.writeUInt8(r, base+2)
+//     mes.writeUInt8(g, base+3)
+//     mes.writeUInt8(b, base+4)
+//   }
+//   offset += strips[f].length*5
+// }
+// sendBuffer(mes)
 
 
 /*
@@ -112,52 +116,52 @@ client.send(message, 0, message.length, PORT, HOST, function(err, bytes) {
 //   sendBuffer(mes)
 // }, 3000);
 
-function sendBuffer(buffer) {
-  client.send(buffer, 0, buffer.length, PORT, HOST, function(err, bytes) {
-    if (err) throw err;
-    updateStripsByBuffer(buffer)
-    io.emit('stripData', getStripDataByBuffer(buffer))
-  })
-}
+// function sendBuffer(buffer) {
+//   client.send(buffer, 0, buffer.length, PORT, HOST, function(err, bytes) {
+//     if (err) throw err;
+//     updateStripsByBuffer(buffer)
+//     io.emit('stripData', getStripDataByBuffer(buffer))
+//   })
+// }
 
-function getStripDataByBuffer(buffer) {
-  let res = []
-  for (let i = 0; i < buffer.length/5; i++) {
-    if (res[buffer[i*5]] == undefined) res[buffer[i*5]] = []
-    res[buffer[i*5]][buffer[i*5+1]] = [ buffer[i*5+2], buffer[i*5+3], buffer[i*5+4] ]
-  }
-  return res
-}
+// function getStripDataByBuffer(buffer) {
+//   let res = []
+//   for (let i = 0; i < buffer.length/5; i++) {
+//     if (res[buffer[i*5]] == undefined) res[buffer[i*5]] = []
+//     res[buffer[i*5]][buffer[i*5+1]] = [ buffer[i*5+2], buffer[i*5+3], buffer[i*5+4] ]
+//   }
+//   return res
+// }
 
-function updateStripsByBuffer(buffer) {
-  for (let i = 0; i < buffer.length/5; i++) {
-    strips[buffer[i*5]].data[buffer[i*5+1]] = [ buffer[i*5+2], buffer[i*5+3], buffer[i*5+4] ]
-  }
-  return strips
-}
+// function updateStripsByBuffer(buffer) {
+//   for (let i = 0; i < buffer.length/5; i++) {
+//     strips[buffer[i*5]].data[buffer[i*5+1]] = [ buffer[i*5+2], buffer[i*5+3], buffer[i*5+4] ]
+//   }
+//   return strips
+// }
 
 
 
-io.on('connection', function(socket){
+// io.on('connection', function(socket){
 
-  let mode = {  }
-  let existingModes = []
-  // Add Modes events
-  Object.keys(Modes).forEach((key) => {
-    existingModes.push(Modes[key].clientInfo)
-    if (Modes[key].activated) mode = Modes[key].clientInfo;
-    var events = Modes[key].events()
-    Object.keys(events).forEach(k => {
-      socket.on(k, events[k])
-    })
-  })
+//   let mode = {  }
+//   let existingModes = []
+//   // Add Modes events
+//   Object.keys(Modes).forEach((key) => {
+//     existingModes.push(Modes[key].clientInfo)
+//     if (Modes[key].activated) mode = Modes[key].clientInfo;
+//     var events = Modes[key].events()
+//     Object.keys(events).forEach(k => {
+//       socket.on(k, events[k])
+//     })
+//   })
 
-  socket.emit('strips', strips)
-  socket.emit('mode', mode)
-  socket.emit('existingModes', existingModes)
+//   socket.emit('strips', strips)
+//   socket.emit('mode', mode)
+//   socket.emit('existingModes', existingModes)
   
-})
+// })
 
-http.listen(3030, function(){
-  console.log('listening on *:3030');
-});
+// http.listen(3030, function(){
+//   console.log('listening on *:3030');
+// });

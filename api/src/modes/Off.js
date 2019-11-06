@@ -1,46 +1,26 @@
 module.exports = class Off {
-  constructor(strips, sendBuffer, io) {
-    this.strips = strips
-    this.sendBuffer = sendBuffer
-    this.io = io
-    this.activated = true
-    this.clientInfo = {
-      name: 'Off',
-      description: 'No Light. No Sight!',
-      id: 'OFF'
-    }
+  constructor(_width, _height, _config) {
+    this.width = _width
+    this.height = _height
+    this.initilized = false
+    this.config = _config || {}
   }
 
-  events () {
-    return {
-      'setMode': n => this.checkMode(n)
-    }
-  }
-
-  run () {
-    let mes = Buffer.alloc(this.strips.reduce((prev, cur) => prev+cur.length, 0)*5)
-    let offset = 0
-    for (let f = 0; f < this.strips.length; f++) {
-      for (let i = 0; i < this.strips[f].data.length; i++) {
-        const base = i*5+offset
-        mes.writeUInt8(f, base)   // StripId
-        mes.writeUInt8(i, base+1) // Address
-        mes.writeUInt8(0, base+2) // Red
-        mes.writeUInt8(0, base+3) // Green
-        mes.writeUInt8(0, base+4) // Blue
+  update () {
+    if (!this.initilized) {
+      let res = []
+      for (let x = 0; x < this.width; x++) {
+        for (let y = 0; y < this.height; y++) {
+          res.push({
+            x, y,
+            r: 0,
+            g: 0,
+            b: 0
+          })
+        }
       }
-      offset += this.strips[f].length*5
-    }
-
-    this.sendBuffer(mes)
+      this.initilized = true
+      return res
+    } else return []
   }
-
-  checkMode (payload) {
-    this.activated = payload.toUpperCase() === this.clientInfo.id.toUpperCase()
-    if (this.activated) this.io.emit('mode', this.clientInfo)
-    else return
-    setTimeout(() => this.run(), 10)
-
-  }
-
 } 
