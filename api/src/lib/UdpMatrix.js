@@ -19,7 +19,7 @@ module.exports = class UdpMatrix extends Matrix {
   updateStats () {
     this.bytesPerSecond = this.bytesLastSecond
     this.bytesLastSecond = 0
-    console.log(`${this.bytesPerSecond} bps`)
+    console.log(`Currently sending ${this.bytesPerSecond} bps`)
   }
   
   send () {

@@ -5,7 +5,6 @@ module.exports = class AddressRainbow extends Template {
     super(_matrix, _config)
     this.defaultConfig = {
       brightness: 255,
-      cycleTime: 60000,
       fadein: 500,
       repeat: 1,
       waitFrames: 8,
@@ -25,9 +24,9 @@ module.exports = class AddressRainbow extends Template {
       for (let y = 0; y < this.matrix.height; y++) {
         this.matrix.pixel(
           x,y,
-          Math.sin(frequency*y + 0) * 127 + 128,
-          Math.sin(frequency*y + 2) * 127 + 128,
-          Math.sin(frequency*y + 4) * 127 + 128,
+          (Math.sin(frequency*y + 0) * 127 + 128)/255*this.getConfig('brightness'),
+          (Math.sin(frequency*y + 2) * 127 + 128)/255*this.getConfig('brightness'),
+          (Math.sin(frequency*y + 4) * 127 + 128)/255*this.getConfig('brightness'),
           this.getConfig('fadein'),
           'LINEAR'
         )
