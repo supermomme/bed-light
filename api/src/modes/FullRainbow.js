@@ -1,38 +1,46 @@
-let Ramp = require('ramp.js')
+const Template = require('./Template')
+const Ramp = require('ramp.js')
 
-module.exports = class FullRainbow {
-  constructor(_width, _height, _config) {
-    this.width = _width
-    this.height = _height
+module.exports = class FullRainbow extends Template {
+  constructor(_matrix, _config) {
+    super(_matrix, _config)
     this.defaultConfig = {
       brightness: 255,
-      cycleTime: 60000
+      cycleTime: 60000,
+      fadein: 500
     }
-    this.config = _config || this.defaultConfig
-    this.r = new Ramp(this.getConfig('brightness'))
-    this.g = new Ramp(0)
-    this.b = new Ramp(0)
-    this.waitFrames = 0
+
     this.nextPhase = 0
+
+    this.init()
+  }
+
+  init() {
+    this.initialized = false
+    this.matrix.fillRed(this.getConfig('brightness'), this.getConfig('fadein'), 'LINEAR')
+    this.matrix.fillGreen(0, this.getConfig('fadein'), 'LINEAR')
+    this.matrix.fillBlue(0, this.getConfig('fadein'), 'LINEAR')
   }
 
   update () {
-    let allFinished = this.r.isFinished() && this.g.isFinished() && this.b.isFinished()
-    if(allFinished) {
+    super.update()
+    if (!this.initialized) return
+
+    if(!this.matrix.isRunning()) {
       switch (this.nextPhase) {
         case 0:
-          this.r.go(0, this.getConfig('cycleTime')/3, 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
-          this.g.go(this.getConfig('brightness'), this.getConfig('cycleTime')/3, 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
+          this.matrix.fillRed(0, this.getConfig('cycleTime')/3, 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
+          this.matrix.fillGreen(this.getConfig('brightness'), this.getConfig('cycleTime')/3, 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
           this.nextPhase++
           break;
         case 1:
-          this.g.go(0, this.getConfig('cycleTime')/3, 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
-          this.b.go(this.getConfig('brightness'), this.getConfig('cycleTime')/3, 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
+          this.matrix.fillGreen(0, this.getConfig('cycleTime')/3, 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
+          this.matrix.fillBlue(this.getConfig('brightness'), this.getConfig('cycleTime')/3, 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
           this.nextPhase++
           break;
         case 2:
-          this.b.go(0, this.getConfig('cycleTime')/3, 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
-          this.r.go(this.getConfig('brightness'), this.getConfig('cycleTime')/3, 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
+          this.matrix.fillBlue(0, this.getConfig('cycleTime')/3, 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
+          this.matrix.fillRed(this.getConfig('brightness'), this.getConfig('cycleTime')/3, 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
           this.nextPhase = 0
           break;
       
@@ -41,22 +49,5 @@ module.exports = class FullRainbow {
           break;
       }
     }
-
-    let res = []
-    for (let x = 0; x < this.width; x++) {
-      for (let y = 0; y < this.height; y++) {
-        res.push({
-          x,y,
-          r: this.r.update(),
-          g: this.g.update(),
-          b: this.b.update()
-        })
-      }
-    }
-    return res
-  }
-
-  getConfig (conf) {
-    return this.config[conf] != undefined ? this.config[conf] : this.defaultConfig[conf]
   }
 } 

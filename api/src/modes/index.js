@@ -1,3 +1,4 @@
-exports.Off = require("./Off.js")
-exports.FullRandom = require("./FullRandom.js")
-exports.FullRainbow = require("./FullRainbow.js")
+exports.Off = require("./Off")
+exports.FullRandom = require("./FullRandom")
+exports.FullRainbow = require("./FullRainbow")
+exports.AddressRainbow = require('./AddressRainbow')

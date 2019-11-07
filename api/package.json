@@ -16,7 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.15.2",
-    "ramp.js": "^1.1.0",
+    "ramp.js": "^1.2.1",
     "socket.io": "^2.3.0"
   },
   "devDependencies": {

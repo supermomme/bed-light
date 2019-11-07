@@ -1,6 +1,42 @@
-const Main = require('./Main')
+const Controller = require('./lib/Controller')
+var Modes = require('./modes')
+const UdpMatrix = require('./lib/UdpMatrix');
 
-let main = new Main()
+let matrices = [
+  { name: 'Bed', matrix: new UdpMatrix(2, 60, '10.0.80.21', '33333') }
+]
+
+matrices.forEach((matrix) => {
+  matrix.mode = new Modes.Off(matrix.matrix, {
+    waitFrames: 0,
+    fadeout: 1000
+  })
+});
+
+let controller = new Controller(matrices)
+
+
+setTimeout(() => {
+  controller.setMode(0, Modes.AddressRainbow)
+}, 1000)
+
+// var frequency = .3;
+// for (var i = 0; i < 120; ++i)
+// {
+//    red   = Math.sin(frequency*i + 0) * 127 + 128;
+//    green = Math.sin(frequency*i + 2) * 127 + 128;
+//    blue  = Math.sin(frequency*i + 4) * 127 + 128;
+
+//    document.write( '<font color="' + RGB2Color(red,green,blue) + '">&#9608;</font>');
+// }
+
+
+// setTimeout(() => {
+//   controller.setMode(0, Modes.FullRandom)
+// }, 5000)
+// setTimeout(() => {
+//   controller.setMode(0, Modes.Off)
+// }, 6000)
 
 // const express = require('express');
 // const app = express();

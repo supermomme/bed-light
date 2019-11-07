@@ -1,56 +1,58 @@
-let Ramp = require('ramp.js')
+const Template = require('./Template')
 
-module.exports = class FullRandom {
-  constructor(_width, _height, _config) {
-    this.width = _width
-    this.height = _height
+module.exports = class FullRandom extends Template {
+  constructor(_matrix, _config) {
+    super(_matrix, _config)
     this.defaultConfig = {
       fadeout: [ 700, 1300 ],
       waitFrames: [0, 30],
       colorR: [0, 255],
       colorG: [0, 255],
       colorB: [0, 255],
+      fadein: 500
     }
-    this.config = _config || this.defaultConfig
-    this.pixels = []
     this.waitFrames = 0
+
+    this.init()
+  }
+
+  init () {
+    this.initialized = false
+    this.matrix.fillRed(0, this.getConfig('fadein'), 'LINEAR')
+    this.matrix.fillGreen(0, this.getConfig('fadein'), 'LINEAR')
+    this.matrix.fillBlue(0, this.getConfig('fadein'), 'LINEAR')
   }
 
   update () {
-    for(var i = this.pixels.length - 1; i >= 0; i--) {
-      if(this.pixels[i].r.isFinished() && this.pixels[i].g.isFinished() && this.pixels[i].b.isFinished()) {
-        this.pixels.splice(i, 1);
-      }
-    }
-
-    let fadeout = Array.isArray(this.getConfig('fadeout')) ? this.randomMinMax(this.getConfig('fadeout')[0], this.getConfig('fadeout')[1]) : this.getConfig('fadeout')
-    let x = Math.round(Math.random()*(this.width - 1))
-    let y = Math.round(Math.random()*(this.height - 1))
-
-    let r = new Ramp(this.getRedColor())
-    r.go(0, fadeout, 'LINEAR', 'ONCEFORWARD')
-    let g = new Ramp(this.getGreenColor())
-    g.go(0, fadeout, 'LINEAR', 'ONCEFORWARD')
-    let b = new Ramp(this.getBlueColor())
-    b.go(0, fadeout, 'LINEAR', 'ONCEFORWARD')
+    super.update()
+    if (!this.initialized) return
 
     if (this.waitFrames <= 0) {
-      this.pixels.push({ x, y, r, g, b })
+      let fadeout = Array.isArray(this.getConfig('fadeout')) ? this.randomMinMax(this.getConfig('fadeout')[0], this.getConfig('fadeout')[1]) : this.getConfig('fadeout')
+      let x = Math.round(Math.random()*(this.matrix.width - 1))
+      let y = Math.round(Math.random()*(this.matrix.height - 1))
+  
+      this.matrix.pixel(
+        x,
+        y,
+        this.getRedColor(),
+        this.getGreenColor(),
+        this.getBlueColor()
+      )
+      this.matrix.pixel(
+        x,
+        y,
+        0,
+        0,
+        0,
+        fadeout,
+        'LINEAR',
+        'ONCEFORWARD'
+      )
       this.waitFrames = Array.isArray(this.getConfig('waitFrames')) ? this.randomMinMax(this.getConfig('waitFrames')[0], this.getConfig('waitFrames')[1]) : this.getConfig('waitFrames')
     } else {
       this.waitFrames--
     }
-
-    return this.pixels.map(({x,y,r,g,b}) => ({
-        x,y,
-        r: r.update(),
-        g: g.update(),
-        b: b.update()
-    }))
-  }
-
-  getConfig (conf) {
-    return this.config[conf] != undefined ? this.config[conf] : this.defaultConfig[conf]
   }
 
   getRedColor () {
@@ -66,9 +68,5 @@ module.exports = class FullRandom {
   getBlueColor () {
     let color = this.getConfig('colorB')
     return Array.isArray(color) ? this.randomMinMax(color[0], color[1]) : color
-  }
-
-  randomMinMax(min, max) {
-    return Math.round(Math.random()*(max-min))+min
   }
 } 
