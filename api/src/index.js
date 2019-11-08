@@ -1,35 +1,25 @@
 const Controller = require('./lib/Controller')
-var Modes = require('./modes')
 const UdpMatrix = require('./lib/UdpMatrix');
+// const schedule = require('node-schedule');
+var Modes = require('./modes.js')
 
 let matrices = [
   { name: 'Bed', matrix: new UdpMatrix(2, 60, '10.0.80.21', '33333') }
 ]
 
 matrices.forEach((matrix) => {
-  matrix.mode = new Modes.Off(matrix.matrix, {
-    waitFrames: 0,
-    fadeout: 1000
-  })
+  matrix.mode = new Modes.FullRainbow(matrix.matrix, {cycleTime:120000})
 });
 
 let controller = new Controller(matrices)
 
+// schedule.scheduleJob('45 8 * * 5', function(){
+//   controller.setMode(0, Modes.AddressRainbow)
+// });
 
-setTimeout(() => {
-  controller.setMode(0, Modes.AddressRainbow)
-}, 1000)
-
-// var frequency = .3;
-// for (var i = 0; i < 120; ++i)
-// {
-//    red   = Math.sin(frequency*i + 0) * 127 + 128;
-//    green = Math.sin(frequency*i + 2) * 127 + 128;
-//    blue  = Math.sin(frequency*i + 4) * 127 + 128;
-
-//    document.write( '<font color="' + RGB2Color(red,green,blue) + '">&#9608;</font>');
-// }
-
+// schedule.scheduleJob('30 9 * * 5', function(){
+//   controller.setMode(0, Modes.Off)
+// });
 
 // setTimeout(() => {
 //   controller.setMode(0, Modes.FullRandom)
@@ -38,166 +28,42 @@ setTimeout(() => {
 //   controller.setMode(0, Modes.Off)
 // }, 6000)
 
-// const express = require('express');
-// const app = express();
-// const http = require('http').createServer(app);
-// const dgram = require('dgram');
-// const io = require('socket.io')(http);
+const express = require('express');
+const app = express();
+const http = require('http').createServer(app);
+const io = require('socket.io')(http);
 
-// var Modes = require('./modes')
-// const PORT = 33333;
-// const HOST = '10.0.80.21';
+io.on('connection', (socket) => {
+  socket.on('reqMatricies', () => {
+    socket.emit('matricies', controller.getMatrices())
+  })
+  socket.on('reqModes', () => {
+    socket.emit('modes', Modes.info)
+  })
 
-// const client = dgram.createSocket('udp4');
-// var strips = [
-//   {
-//     name: "ONE",
-//     length: 60
-//   },
-//   {
-//     name: "TWO",
-//     length: 60
-//   }
-// ]
+  // let mode = {  }
+  // let existingModes = []
+  // // Add Modes events
+  // Object.keys(Modes).forEach((key) => {
+  //   existingModes.push(Modes[key].clientInfo)
+  //   if (Modes[key].activated) mode = Modes[key].clientInfo;
+  //   var events = Modes[key].events()
+  //   Object.keys(events).forEach(k => {
+  //     socket.on(k, events[k])
+  //   })
+  // })
 
-// for (const key in Modes) {
-//   if (Modes.hasOwnProperty(key)) {
-//     Modes[key] = new Modes[key](strips, sendBuffer, io)
-//   }
-// }
+  // socket.emit('strips', strips)
+  // socket.emit('mode', mode)
+  // socket.emit('existingModes', existingModes)
 
-// for (let f = 0; f < strips.length; f++) {
-//   strips[f].data = []
-//   for (let i = 0; i < strips[f].length; i++) {
-//     strips[f].data[i] = [0,0,0]
-//   }
-// }
+  socket.on('setMode', (n) => {
+    if (n.matrixId != undefined && n.modeId != undefined)
+      controller.setMode(n.matrixId, Modes[n.modeId], n.config)
+      io.emit('matricies', controller.getMatrices())
+  })
+})
 
-// let mes = Buffer.alloc(strips.reduce((prev, cur) => prev+cur.length, 0)*5)
-// let offset = 0
-// for (let f = 0; f < strips.length; f++) {
-//   for (let i = 0; i < strips[f].data.length; i++) {
-//     const [r,g,b] = strips[f].data[i];
-//     const base = (i)*5+offset
-//     mes.writeUInt8(f, base)
-//     mes.writeUInt8(i, base+1)
-//     mes.writeUInt8(r, base+2)
-//     mes.writeUInt8(g, base+3)
-//     mes.writeUInt8(b, base+4)
-//   }
-//   offset += strips[f].length*5
-// }
-// sendBuffer(mes)
-
-
-/*
-var message = Buffer.alloc(3*5);
-message[0] = 0x01 // Strip id
-message[1] = 0x00 // Addr
-message[2] = 0xFF // Red
-message[3] = 0x00 // Green
-message[4] = 0x00 // Blue
-
-message[5] = 0x01
-message[6] = 0x01
-message[7] = 0xFF
-message[8] = 0x00
-message[9] = 0x00
-
-message[10] = 0x01
-message[11] = 0x02
-message[12] = 0xFF
-message[13] = 0x00
-message[14] = 0x00
-
-console.log(message)
-client.send(message, 0, message.length, PORT, HOST, function(err, bytes) {
-  if (err) throw err;
-  console.log('UDP message sent to ' + HOST +':'+ PORT);
-  console.log(bytes)
-  client.close();
-});*/
-
-
-// setInterval(() => { // all random
-//   let message = Buffer.alloc(5)
-//   message[0] = Math.round(Math.random())
-//   message[1] = Math.round(Math.random()*60)
-//   message[2] = Math.round(Math.random()*255)
-//   message[3] = Math.round(Math.random()*255)
-//   message[4] = Math.round(Math.random()*255)
-//   sendBuffer(message)
-// }, 1000/50);
-
-
-
-// setInterval(() => { // Clear everything
-//   let mes1 = Buffer.alloc(60*5)
-//   for (let i = 0; i < 60; i++) {
-//     mes1[i*5] = 0x00
-//     mes1[i*5+1] = i
-//     mes1[i*5+2] = 0x00
-//     mes1[i*5+3] = 0x00
-//     mes1[i*5+4] = 0x00
-//   }
-//   let mes2 = Buffer.alloc(60*5)
-//   for (let i = 0; i < 60; i++) {
-//     mes2[i*5] = 0x01
-//     mes2[i*5+1] = i
-//     mes2[i*5+2] = 0x00
-//     mes2[i*5+3] = 0x00
-//     mes2[i*5+4] = 0x00
-//   }
-//   let mes = Buffer.concat([mes1, mes2])
-//   sendBuffer(mes)
-// }, 3000);
-
-// function sendBuffer(buffer) {
-//   client.send(buffer, 0, buffer.length, PORT, HOST, function(err, bytes) {
-//     if (err) throw err;
-//     updateStripsByBuffer(buffer)
-//     io.emit('stripData', getStripDataByBuffer(buffer))
-//   })
-// }
-
-// function getStripDataByBuffer(buffer) {
-//   let res = []
-//   for (let i = 0; i < buffer.length/5; i++) {
-//     if (res[buffer[i*5]] == undefined) res[buffer[i*5]] = []
-//     res[buffer[i*5]][buffer[i*5+1]] = [ buffer[i*5+2], buffer[i*5+3], buffer[i*5+4] ]
-//   }
-//   return res
-// }
-
-// function updateStripsByBuffer(buffer) {
-//   for (let i = 0; i < buffer.length/5; i++) {
-//     strips[buffer[i*5]].data[buffer[i*5+1]] = [ buffer[i*5+2], buffer[i*5+3], buffer[i*5+4] ]
-//   }
-//   return strips
-// }
-
-
-
-// io.on('connection', function(socket){
-
-//   let mode = {  }
-//   let existingModes = []
-//   // Add Modes events
-//   Object.keys(Modes).forEach((key) => {
-//     existingModes.push(Modes[key].clientInfo)
-//     if (Modes[key].activated) mode = Modes[key].clientInfo;
-//     var events = Modes[key].events()
-//     Object.keys(events).forEach(k => {
-//       socket.on(k, events[k])
-//     })
-//   })
-
-//   socket.emit('strips', strips)
-//   socket.emit('mode', mode)
-//   socket.emit('existingModes', existingModes)
-  
-// })
-
-// http.listen(3030, function(){
-//   console.log('listening on *:3030');
-// });
+http.listen(3030, function(){
+  console.log('listening on *:3030');
+});

@@ -1,6 +1,3 @@
-var Modes = require('../modes')
-const UdpMatrix = require('./UdpMatrix');
-
 module.exports = class Controller {
   constructor(_matrices, _fps = 60) {
 
@@ -15,6 +12,16 @@ module.exports = class Controller {
       this.updateMatrices()
     }, 1000/this.fps)
 
+  }
+
+  getMatrices () {
+    return this.matrices.map(matrix => ({
+      width: matrix.width,
+      height: matrix.height,
+      name: matrix.name,
+      modeInfo: matrix.mode.info,
+      modeConfig: matrix.mode.getWholeConfig()
+    }))
   }
 
   setMode(matrixId, uninitilizedMode, ...args) {

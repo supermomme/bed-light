@@ -1,12 +1,25 @@
-const Template = require('./Template')
-const Ramp = require('ramp.js')
+const Template = require('./_Template')
 
-module.exports = class Off extends Template {
+exports.info = {
+  id: 'Off',
+  name: 'Off',
+  description: '',
+  config: [
+    {
+      id: 'fadeout',
+      name: 'Ausblendung der Farben in Millisekunden',
+      type: 'number',
+      default: 500,
+      canBeMinMax: false
+    }
+  ]
+}
+
+exports.class = class Off extends Template {
   constructor(_matrix, _config) {
     super(_matrix, _config)
-    this.defaultConfig = {
-      fadeout: 500
-    }
+    this.info = module.exports.info
+    this.defaultConfig.fadeout = 500
 
     this.init()
   }
@@ -21,4 +34,4 @@ module.exports = class Off extends Template {
   }
 
   update () { }
-} 
+}
