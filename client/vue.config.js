@@ -9,6 +9,7 @@ module.exports = {
     }
   },
   transpileDependencies: [
-    'vuetify'
+    'vuetify',
+    'feathers-vuex'
   ]
 }

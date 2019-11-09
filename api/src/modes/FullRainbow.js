@@ -64,25 +64,25 @@ exports.class = class FullRainbow extends Template {
 
     if(!this.matrix.isRunning()) {
       switch (this.nextPhase) {
-        case 0:
-          this.matrix.fillRed(0, Math.floor(this.getConfig('cycleTime')/3), 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
-          this.matrix.fillGreen(Math.floor(this.getConfig('brightness')), Math.floor(this.getConfig('cycleTime')/3), 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
-          this.nextPhase++
-          break;
-        case 1:
-          this.matrix.fillGreen(0, Math.floor(this.getConfig('cycleTime')/3), 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
-          this.matrix.fillBlue(Math.floor(this.getConfig('brightness')), Math.floor(this.getConfig('cycleTime')/3), 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
-          this.nextPhase++
-          break;
-        case 2:
-          this.matrix.fillBlue(0, Math.floor(this.getConfig('cycleTime')/3), 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
-          this.matrix.fillRed(Math.floor(this.getConfig('brightness')), Math.floor(this.getConfig('cycleTime')/3), 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
-          this.nextPhase = 0
-          break;
+      case 0:
+        this.matrix.fillRed(0, Math.floor(this.getConfig('cycleTime')/3), 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
+        this.matrix.fillGreen(Math.floor(this.getConfig('brightness')), Math.floor(this.getConfig('cycleTime')/3), 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
+        this.nextPhase++
+        break
+      case 1:
+        this.matrix.fillGreen(0, Math.floor(this.getConfig('cycleTime')/3), 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
+        this.matrix.fillBlue(Math.floor(this.getConfig('brightness')), Math.floor(this.getConfig('cycleTime')/3), 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
+        this.nextPhase++
+        break
+      case 2:
+        this.matrix.fillBlue(0, Math.floor(this.getConfig('cycleTime')/3), 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
+        this.matrix.fillRed(Math.floor(this.getConfig('brightness')), Math.floor(this.getConfig('cycleTime')/3), 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
+        this.nextPhase = 0
+        break
       
-        default:
-          this.nextPhase = 0
-          break;
+      default:
+        this.nextPhase = 0
+        break
       }
     }
   }

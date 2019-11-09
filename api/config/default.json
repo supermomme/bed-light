@@ -1,0 +1,19 @@
+{
+  "host": "0.0.0.0",
+  "port": 3030,
+  "public": "../public/",
+  "paginate": {
+    "default": 10,
+    "max": 50
+  },
+  "matrices": [
+    {
+      "name": "Bed",
+      "type": "UDP",
+      "width": 2,
+      "height": 60,
+      "host": "10.0.80.21",
+      "port": "33333"
+    }
+  ]
+}

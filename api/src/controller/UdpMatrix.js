@@ -1,5 +1,5 @@
 const Matrix = require('./Matrix')
-const dgram = require('dgram');
+const dgram = require('dgram')
 
 module.exports = class UdpMatrix extends Matrix {
   constructor (_width, _height, _host, _port, _fps) {
@@ -26,8 +26,8 @@ module.exports = class UdpMatrix extends Matrix {
     for (let x = 0; x < this.width; x++) {
       for (let y = 0; y < this.height; y++) {
         let index = this.pixelsToSend.findIndex(n => {
-          return n.x === x && n.y === y;
-        });
+          return n.x === x && n.y === y
+        })
         if (index === -1 && this.matrix[x][y].isRunning()) this.pixelsToSend.push({x, y})
       }
     }
@@ -45,7 +45,7 @@ module.exports = class UdpMatrix extends Matrix {
     }
     this.pixelsToSend = []
     this.udpClient.send(buffer, 0, buffer.length, this.port, this.host, (err, bytes) => {
-      if (err) throw err;
+      if (err) throw err
       this.bytesLastSecond += bytes
     })
   }

@@ -30,14 +30,10 @@ module.exports = class Template {
   getWholeConfig () {
     let con = {}
     for (const key in this.defaultConfig) {
-      if (this.defaultConfig.hasOwnProperty(key)) {
-        con[key] = this.defaultConfig[key]
-      }
+      con[key] = this.defaultConfig[key]
     }
     for (const key in this.config) {
-      if (this.config.hasOwnProperty(key)) {
-        con[key] = this.config[key]
-      }
+      con[key] = this.config[key]
     }
     return con
   }

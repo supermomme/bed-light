@@ -15,13 +15,7 @@ module.exports = class Controller {
   }
 
   getMatrices () {
-    return this.matrices.map(matrix => ({
-      width: matrix.width,
-      height: matrix.height,
-      name: matrix.name,
-      modeInfo: matrix.mode.info,
-      modeConfig: matrix.mode.getWholeConfig()
-    }))
+    return this.matrices
   }
 
   setMode(matrixId, uninitilizedMode, ...args) {

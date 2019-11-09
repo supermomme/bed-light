@@ -1,0 +1,41 @@
+<template>
+  <div class="home">
+    <v-container>
+      <v-btn v-for="matrix in matrices" :key="matrix.id" outlined large color="primary" @click="openSelectModeDialog(matrix.id)">{{ matrix.name }}</v-btn>
+    </v-container>
+    <HelloWorld msg="Na to Your Vue.js App"/>
+  </div>
+</template>
+
+<script>
+import HelloWorld from '@/components/HelloWorld.vue'
+
+export default {
+  name: 'Dashboard',
+  components: {
+    HelloWorld
+  },
+  watch: {
+    '$route': {
+      handler: 'fetch',
+      immediate: true
+    }
+  },
+  computed: {
+    matrices () {
+      return this.$store.getters['matrix/list']
+    }
+  },
+  methods: {
+    openSelectModeDialog (matrixId) {
+      this.$store.commit('setDialogMeta', { matrixId })
+      this.$store.commit('openDialog', 'SelectModeDialog')
+    },
+    async fetch () {
+      await this.$store.dispatch('matrix/find')
+      await this.$store.dispatch('mode/find')
+      console.log('fetch')
+    }
+  }
+}
+</script>

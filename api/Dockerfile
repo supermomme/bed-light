@@ -8,4 +8,5 @@ COPY package*.json ./
 RUN npm ci
 COPY . .
 EXPOSE 3030
+EXPOSE 1883
 CMD ["npm", "start"]
