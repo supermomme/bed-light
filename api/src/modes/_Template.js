@@ -1,30 +1,47 @@
-module.exports = class Template {
-  constructor(_matrix, _config = {}) {
-    this.matrix = _matrix
-    this.defaultConfig = { fps: this.matrix.fps }
+exports.Config = {
+  fps: {
+    name: 'FPS',
+    description: 'frames per second',
+    type: 'number',
+    canBeRandom: false,
+    triggerInit: true
+  }
+}
+
+exports.Template = class Template {
+  constructor(_width, _height, _config = {}) {
+    this.width = _width
+    this.height = _height
+    this.defaultConfig = { fps : 30 }
     this.config = _config
+    this.updateInterval = null
     this.initialized = false
-    this.waitFrames = 0
   }
 
-  shouldUpdate () {
-    return this.waitFrames === 0
+  destroy () {
+    this.initialized = false
+    clearInterval(this.updateInterval)
   }
 
-  update () {
-    if (!this.initialized) this.initialized = !this.matrix.isRunning()
-    if (this.waitFrames < 0) {
-      let myFps = Array.isArray(this.getConfig('fps')) ? this.randomMinMax(this.getConfig('fps')[0], this.getConfig('fps')[1]) : this.getConfig('fps')
-      if (myFps > this.matrix.fps) myFps = this.matrix.fps
-      this.waitFrames  = Math.floor((this.matrix.fps / myFps) - 1)
-    } else {
-      this.waitFrames--
+  init () {
+    this.destroy()
+    this.updateInterval = setInterval(() => this.update(), 1000/this.getConfig('fps'))
+    this.initialized = true
+  }
+
+  update () { }
+
+  setConfig (newConf) {
+    for (const key in newConf) {
+      if (newConf.hasOwnProperty(key)) {
+        this.config[key] = newConf[key]
+      }
     }
+    if (newConf.fps) this.init()
   }
 
   getConfig (conf) {
     return this.getWholeConfig()[conf]
-    // this.config[conf] == undefined ? this.defaultConfig[conf] : this.config[conf]
   }
 
   getWholeConfig () {

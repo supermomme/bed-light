@@ -3,18 +3,13 @@
     <v-container>
       <v-btn v-for="matrix in matrices" :key="matrix.id" outlined large color="primary" @click="openSelectModeDialog(matrix.id)">{{ matrix.name }}</v-btn>
     </v-container>
-    <HelloWorld msg="Na to Your Vue.js App"/>
   </div>
 </template>
 
 <script>
-import HelloWorld from '@/components/HelloWorld.vue'
 
 export default {
   name: 'Dashboard',
-  components: {
-    HelloWorld
-  },
   watch: {
     '$route': {
       handler: 'fetch',

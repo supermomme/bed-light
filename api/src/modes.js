@@ -1,10 +1,11 @@
 var normalizedPath = require('path').join(__dirname, 'modes')
 
-exports.info = []
+exports.Modes = {}
+exports.Info = []
 
 require('fs').readdirSync(normalizedPath).forEach((file) => {
   if (file[0] === '_') return
   let mode = require('./modes/' + file)
-  exports[mode.info.id] = mode.class
-  exports.info.push(mode.info)
+  exports.Modes[mode.Info.id] = mode.class
+  exports.Info.push(mode.Info)
 })

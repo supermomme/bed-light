@@ -73,12 +73,89 @@
                 cols="12"
                 v-else-if="conf.type === 'number' && conf.canBeMinMax === false"
               >
+                <v-text-field
+                  single-line
+                  v-model="config[conf.id].value"
+                >
+                  <template v-slot:prepend>
+                    <v-icon @click="config[conf.id].value--">
+                      mdi-minus
+                    </v-icon>
+                  </template>
+                  <template v-slot:append>
+                    <v-icon @click="config[conf.id].value++">
+                      mdi-plus
+                    </v-icon>
+                  </template>
+                </v-text-field>
+              </v-col>
+
+              <v-col
+                cols="12"
+                v-else-if="conf.type === 'number' && conf.canBeMinMax === true"
+              >
+                <v-switch
+                  v-model="config[conf.id].useRange"
+                  label="Use Range (random)"
+                />
+
+                <v-text-field
+                  v-if="!config[conf.id].useRange"
+                  single-line
+                  v-model="config[conf.id].value"
+                >
+                  <template v-slot:prepend>
+                    <v-icon @click="config[conf.id].value--">
+                      mdi-minus
+                    </v-icon>
+                  </template>
+                  <template v-slot:append>
+                    <v-icon @click="config[conf.id].value++">
+                      mdi-plus
+                    </v-icon>
+                  </template>
+                </v-text-field>
+
+                <template v-else>
+
+                  <v-text-field
+                    single-line
+                    label="Min"
+                    v-model="config[conf.id].range[0]"
+                  >
+                    <template v-slot:prepend>
+                      <v-icon @click="config[conf.id].range[0]--">
+                        mdi-minus
+                      </v-icon>
+                    </template>
+                    <template v-slot:append>
+                      <v-icon @click="config[conf.id].range[0]++">
+                        mdi-plus
+                      </v-icon>
+                    </template>
+                  </v-text-field>
+
+                  <v-text-field
+                    single-line
+                    label="Max"
+                    v-model="config[conf.id].range[1]"
+                  >
+                    <template v-slot:prepend>
+                      <v-icon @click="config[conf.id].range[1]--">
+                        mdi-minus
+                      </v-icon>
+                    </template>
+                    <template v-slot:append>
+                      <v-icon @click="config[conf.id].range[1]++">
+                        mdi-plus
+                      </v-icon>
+                    </template>
+                  </v-text-field>
+                </template>
               </v-col>
 
             </v-row>
           </v-col>
-          {{ configInfo }}
-          {{ config }}
         </v-row>
       </v-card-text>
 
@@ -104,7 +181,7 @@ export default {
   name: 'SelectModeDialog',
   data () {
     return {
-      modeId: 'FullRainbow',
+      modeId: '',
       configInfo: [],
       config: {}
     }
@@ -125,25 +202,26 @@ export default {
   },
   methods: {
     async fetchM () {
+      this.modeId = ''
+      this.configInfo = []
+      this.config = {}
       let matrix = await this.$store.dispatch('matrix/get', this.$store.state.dialogMeta.matrixId)
 
       console.log(matrix)
       let res = {}
       for (const key in matrix.modeConfig) {
-        if (matrix.modeConfig.hasOwnProperty(key)) {
-
+        if (matrix.hasOwnProperty('modeConfig') && matrix.modeConfig.hasOwnProperty(key)) {
           res[key] = {}
-          if (Array.isArray(matrix.modeConfig[key])) {
-            res[key].useRange = true
+          res[key].useRange = Array.isArray(matrix.modeConfig[key])
+          if (res[key].useRange) {
             res[key].range = matrix.modeConfig[key]
           } else {
-            res[key].useRange = false
-            res[key].value = matrix.modeConfig[key]
+            res[key].range = [matrix.modeConfig[key], matrix.modeConfig[key]]
           }
+          res[key].value = matrix.modeConfig[key]
         }
       }
       console.log(res)
-      this.config = res
       this.modeId = matrix.modeId
       let mode = this.modes.find(o => o.id === this.modeId)
       if (mode === undefined) {
@@ -152,8 +230,11 @@ export default {
         return
       }
       this.configInfo = mode.config
+      this.config = res
     },
     updateConfig () {
+      this.configInfo = []
+      this.config = {}
       let mode = this.modes.find(o => o.id === this.modeId)
       if (mode === undefined) {
         this.configInfo = []
@@ -164,17 +245,15 @@ export default {
       let res = {}
       for (let i = 0; i < this.configInfo.length; i++) {
         res[this.configInfo[i].id] = {}
-        if (this.configInfo[i].canBeMinMax) {
-          if (Array.isArray(this.configInfo[i].default)) {
-            res[this.configInfo[i].id].useRange = true
-            res[this.configInfo[i].id].range = this.configInfo[i].default
-          } else {
-            res[this.configInfo[i].id].useRange = false
-            res[this.configInfo[i].id].value = this.configInfo[i].default
-          }
+
+        res[this.configInfo[i].id].useRange = Array.isArray(this.configInfo[i].default)
+        if (res[this.configInfo[i].id].useRange) {
+          res[this.configInfo[i].id].range = this.configInfo[i].default
         } else {
-          res[this.configInfo[i].id].value = this.configInfo[i].default
+          res[this.configInfo[i].id].range = [this.configInfo[i].default, this.configInfo[i].default]
         }
+        res[this.configInfo[i].id].value = this.configInfo[i].default
+
       }
       console.log(res)
       this.config = res

@@ -1,89 +1,91 @@
-const Template = require('./_Template')
+const { Template, Config } = require('./_Template')
+const Ramp = require('ramp.js')
 
-exports.info = {
+exports.Info = {
   id: 'FullRainbow',
   name: 'FullRainbow',
   description: '',
-  config: [
-    {
-      id: 'brightness',
-      name: 'Helligkeit',
-      type: 'slider',
-      min: 0,
-      max: 255,
-      default: 255,
-      canBeMinMax: false
-    },
-    {
-      id: 'fadein',
-      name: 'Einblendungsphase in Millisekunden',
+  config: {
+    ...Config,
+    'cycleTime': {
+      name: 'Cycle Time',
+      description: 'Cycle Time in milliseconds',
       type: 'number',
-      default: 500,
-      canBeMinMax: false
-    },
-    {
-      id: 'cycleTime',
-      name: 'RGB Cycle durchgang in Milliseconds',
-      type: 'number',
-      default: 60000,
-      canBeMinMax: false
-    },
-    {
-      id: 'fps',
-      name: 'Wiederholungsrate in FPS',
-      type: 'number',
-      default: 60,
-      canBeMinMax: true
+      canBeRandom: false,
+      triggerInit: true
     }
-  ]
+  }
 }
 
 exports.class = class FullRainbow extends Template {
-  constructor(_matrix, _config) {
-    super(_matrix, _config)
-    this.info = module.exports.info
-    this.defaultConfig.brightness = 255
-    this.defaultConfig.cycleTime = 60000
-    this.defaultConfig.fadein = 500
+  constructor(_width, _height, _config) {
+    super(_width, _height, _config)
+    this.Info = exports.Info
 
+    this.defaultConfig.cycleTime = 120000
     this.nextPhase = 0
+    this.r = new Ramp(255)
+    this.g = new Ramp(0)
+    this.b = new Ramp(0)
 
     this.init()
   }
 
+  setConfig (newConfig) {
+    let reInit = false
+    if (newConfig.cycleTime && newConfig.cycleTime !== this.getConfig(newConfig.cycleTime)) reInit = true
+    super.setConfig(newConfig)
+    if (reInit) this.init()
+  }
+
   init() {
-    this.initialized = false
-    this.matrix.fillRed(Math.floor(this.getConfig('brightness')), Math.floor(this.getConfig('fadein')), 'LINEAR')
-    this.matrix.fillGreen(0, Math.floor(this.getConfig('fadein')), 'LINEAR')
-    this.matrix.fillBlue(0, Math.floor(this.getConfig('fadein')), 'LINEAR')
+    this.destroy()
+    this.nextPhase = 0
+    this.r.go(255, 0, 'NONE', 'ONCEFORWARD')
+    this.g.go(0, 0, 'NONE', 'ONCEFORWARD')
+    this.b.go(0, 0, 'NONE', 'ONCEFORWARD')
+    super.init(true)
+  }
+
+  getMatrix () {
+    let res = []
+    for (let x = 0; x < this.width; x++) {
+      let column = []
+      for (let y = 0; y < this.height; y++) {
+        column.push({
+          r: Math.round(this.r.update()),
+          g: Math.round(this.g.update()),
+          b: Math.round(this.b.update()),
+          a: 1
+        })
+      }
+      res.push(column)
+    }
+    return res
   }
 
   update () {
-    super.update()
-    if (!this.initialized || !this.shouldUpdate()) return
-
-    if(!this.matrix.isRunning()) {
-      switch (this.nextPhase) {
-      case 0:
-        this.matrix.fillRed(0, Math.floor(this.getConfig('cycleTime')/3), 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
-        this.matrix.fillGreen(Math.floor(this.getConfig('brightness')), Math.floor(this.getConfig('cycleTime')/3), 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
-        this.nextPhase++
-        break
-      case 1:
-        this.matrix.fillGreen(0, Math.floor(this.getConfig('cycleTime')/3), 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
-        this.matrix.fillBlue(Math.floor(this.getConfig('brightness')), Math.floor(this.getConfig('cycleTime')/3), 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
-        this.nextPhase++
-        break
-      case 2:
-        this.matrix.fillBlue(0, Math.floor(this.getConfig('cycleTime')/3), 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
-        this.matrix.fillRed(Math.floor(this.getConfig('brightness')), Math.floor(this.getConfig('cycleTime')/3), 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
-        this.nextPhase = 0
-        break
+    if (this.r.isRunning() || this.g.isRunning() || this.b.isRunning()) return
+    switch (this.nextPhase) {
+    case 0:
+      this.r.go(0, Math.floor(this.getConfig('cycleTime')/3), 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
+      this.g.go(255, Math.floor(this.getConfig('cycleTime')/3), 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
+      this.nextPhase++
+      break
+    case 1:
+      this.g.go(0, Math.floor(this.getConfig('cycleTime')/3), 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
+      this.b.go(255, Math.floor(this.getConfig('cycleTime')/3), 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
+      this.nextPhase++
+      break
+    case 2:
+      this.b.go(0, Math.floor(this.getConfig('cycleTime')/3), 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
+      this.g.go(255, Math.floor(this.getConfig('cycleTime')/3), 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
+      this.nextPhase = 0
+      break
       
-      default:
-        this.nextPhase = 0
-        break
-      }
+    default:
+      this.nextPhase = 0
+      break
     }
   }
 } 

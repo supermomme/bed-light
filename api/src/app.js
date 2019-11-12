@@ -15,9 +15,7 @@ const middleware = require('./middleware')
 const services = require('./services')
 const appHooks = require('./app.hooks')
 const channels = require('./channels')
-const Controller = require('./controller/Controller')
 const UdpMatrix = require('./controller/UdpMatrix')
-const Modes = require('./modes.js')
 
 const app = express(feathers())
 
@@ -37,23 +35,18 @@ app.use('/', express.static(app.get('public')))
 app.configure(express.rest())
 app.configure(socketio())
 
-// Init Controller and matrices
-let matrices = []
+// Init Matrices
+app.$matrices = []
 let confMatrices = app.get('matrices')
 for (let i = 0; i < confMatrices.length; i++) {
   const matrix = confMatrices[i]
   if (matrix.type === 'UDP') {
-    matrices.push({
+    app.$matrices.push({
       name: matrix.name,
       matrix: new UdpMatrix(matrix.width, matrix.height, matrix.host, matrix.port)
     })
   }
 }
-matrices.forEach((matrix) => {
-  matrix.mode = new Modes.AddressRainbow(matrix.matrix)
-})
-
-app.$controller = new Controller(matrices)
 
 // Configure other middleware (see `middleware/index.js`)
 app.configure(middleware)

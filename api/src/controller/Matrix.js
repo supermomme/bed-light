@@ -1,4 +1,5 @@
-const Pixel = require('./Pixel')
+const { Modes } = require('../modes.js')
+const Ramp = require('ramp.js')
 
 module.exports = class Matrix {
   constructor (_width, _height) {
@@ -8,94 +9,47 @@ module.exports = class Matrix {
     for (let x = 0; x < this.width; x++) {
       let column = []
       for (let y = 0; y < this.height; y++) {
-        column.push(new Pixel(0, 0, 0))
+        column.push({ r: 0, g: 0, b: 0, a: 0 })
       }
       this.matrix.push(column)
     }
-    this.transitionFinished = true
-  }
 
-  isRunning() {
-    for (let x = 0; x < this.width; x++) {
-      for (let y = 0; y < this.height; y++) {
-        if (this.matrix[x][y].isRunning()) {
-          return true
-        }        
-      }      
-    }
-    return false
-  }
-  
-  fill(...args) {
-    for (let x = 0; x < this.width; x++) {
-      for (let y = 0; y < this.height; y++) {
-        this.pixel(x, y,...args)
-      }
-    }
-  }
-
-  fillRed(...args) {
-    for (let x = 0; x < this.width; x++) {
-      for (let y = 0; y < this.height; y++) {
-        this.pixelRed(x, y,...args)
-      }
-    }
-  }
-
-  fillGreen(...args) {
-    for (let x = 0; x < this.width; x++) {
-      for (let y = 0; y < this.height; y++) {
-        this.pixelGreen(x, y,...args)
-      }
-    }
-  }
-
-  fillBlue(...args) {
-    for (let x = 0; x < this.width; x++) {
-      for (let y = 0; y < this.height; y++) {
-        this.pixelBlue(x, y,...args)
-      }
-    }
-  }
-
-  clear() {
-    this.fill(0,0,0)
-  }
-
-  pixel (x, y, ...args) {
-    this.matrix[x][y].setColor(...args)
-  }
-  pixelRed (x, y, ...args) {
-    this.matrix[x][y].setRed(...args)
-  }
-  pixelGreen (x, y, ...args) {
-    this.matrix[x][y].setGreen(...args)
-  }
-  pixelBlue (x, y, ...args) {
-    this.matrix[x][y].setBlue(...args)
-  }
-
-  shiftY(n = 1) {
-    for (let x = 0; x < this.width; x++) {
-      let oldColumn = this.matrix[x].map(val => val.getColor())
-      for (let y = 0; y < this.height; y++) {
-        let color = {}
-        if (n < 0) {
-          if (y <= n*-1) color = oldColumn[this.height-1]
-          else color = oldColumn[y+n]
-        } else if (n > 0) {
-          if (y >= this.height-n) color = oldColumn[0]
-          else color = oldColumn[y+n]
+    this.modes = {}
+    for (const key in Modes) {
+      if (Modes.hasOwnProperty(key)) {
+        let mode = new Modes[key](this.width, this.height)
+        this.modes[key] = {
+          mode,
+          info: mode.info,
+          config: mode.getWholeConfig(),
+          alpha: 0
         }
-        let { r, g, b } = color
-        this.pixel(x, y, r,g,b)
       }
+    }
+
+    this.alphaTransitionInterval = setInterval(() => this.updateAlphaTransistions(), 10)
+    this.alphaTransistions = []
+  }
+
+  updateAlphaTransistions() {
+    for (let i = 0; i < this.alphaTransistions.length; i++) {
+      const transition = this.alphaTransistions[i]
+      this.modes[transition.modeId].alpha = transition.ramp.update()
+    }
+    this.alphaTransistions = this.alphaTransistions.filter(val => val.ramp.isRunning())
+  }
+
+  setModeAlpha(modeId, alpha, transitionTime = 0) {
+    if (transitionTime === 0) {
+      this.modes[modeId].alpha = alpha
+    } else {
+      let ramp = new Ramp(this.modes[modeId].alpha)
+      ramp.go(alpha, transitionTime, 'LINEAR', 'ONCEFORWARD')
+      this.alphaTransistions.push({ modeId, ramp })
     }
   }
 
-
-
-  // more standard matrix methods... 
-
-  // maybe shiftX
+  setModeConfig(modeId, config) {
+    this.modes[modeId].mode.setConfig(config)
+  }
 }
