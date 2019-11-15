@@ -7,7 +7,7 @@ exports.Mode = class Mode {
   }
 
   async find (params) {
-    return Modes.info
+    return Modes.Info
   }
 
   async get (id, params) {

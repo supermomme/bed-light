@@ -24,7 +24,7 @@ export default {
   methods: {
     openSelectModeDialog (matrixId) {
       this.$store.commit('setDialogMeta', { matrixId })
-      this.$store.commit('openDialog', 'SelectModeDialog')
+      this.$store.commit('openDialog', 'AlphaDialDialog')
     },
     async fetch () {
       await this.$store.dispatch('matrix/find')

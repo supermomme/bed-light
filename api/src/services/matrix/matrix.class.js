@@ -1,4 +1,6 @@
 /* eslint-disable no-unused-vars */
+const { BadRequest } = require('@feathersjs/errors')
+
 const Modes = require('../../modes.js')
 
 exports.Matrix = class Matrix {
@@ -12,7 +14,6 @@ exports.Matrix = class Matrix {
 
   async find (params) {
     return this.app.$matrices.map(({name, matrix}, id) => {
-      console.log(matrix.modes)
       let modes = { }
       for (const key in matrix.modes) {
         if (matrix.modes.hasOwnProperty(key)) {
@@ -28,7 +29,8 @@ exports.Matrix = class Matrix {
         name,
         width: matrix.width,
         height: matrix.height,
-        modes
+        modes,
+        isTransitioning: matrix.isTransitioning()
       }
     })
   }
@@ -37,24 +39,39 @@ exports.Matrix = class Matrix {
     return (await this.find())[id]
   }
 
-  async patch (id, { cmd, modeId, data, transitionTime}, params) {
+  async patch (id, { cmd, modes, modeId, data, transitionTime}, params) {
     switch (cmd) {
     case 'setModeAlpha':
-      this.app.$matrices[id].matrix.setModeAlpha(modeId, data, transitionTime)
+      if (modes === undefined) {
+        this.app.$matrices[id].matrix.setModeAlpha(modeId, data, transitionTime)
+      } else {
+        for (const mId in modes) {
+          if (modes.hasOwnProperty(mId)) {
+            this.app.$matrices[id].matrix.setModeAlpha(mId, modes[mId], transitionTime)
+          }
+        }
+      }
       break
     case 'setModeConfig':
       this.app.$matrices[id].matrix.setModeConfig(modeId, data)
       break
-    
+    case 'stopTransitions':
+      this.app.$matrices[id].matrix.stopTransitions()
+      break
+    case 'justFireEvent':
+      console.log('just fire event')
+      break
     default:
-      return {
-        cmd: [
+      return new BadRequest('Invalid cmd', {
+        cmd,
+        allowed: [
           'setModeConfig',
-          'setModeAlpha'
+          'setModeAlpha',
+          'stopTransitions'
         ]
-      }
+      })
     }
     
-    return 'Ok'
+    return this.get(id)
   }
 }

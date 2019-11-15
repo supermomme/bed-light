@@ -2,9 +2,11 @@ const { Modes } = require('../modes.js')
 const Ramp = require('ramp.js')
 
 module.exports = class Matrix {
-  constructor (_width, _height) {
+  constructor (_width, _height, _app, _index) {
     this.width = _width
     this.height = _height
+    this.app = _app
+    this.index = _index
     this.matrix = []
     for (let x = 0; x < this.width; x++) {
       let column = []
@@ -31,15 +33,28 @@ module.exports = class Matrix {
     this.alphaTransistions = []
   }
 
-  updateAlphaTransistions() {
+  isTransitioning () {
+    return this.alphaTransistions.length > 0
+  }
+
+  updateAlphaTransistions () {
+    if (!this.isTransitioning()) return
     for (let i = 0; i < this.alphaTransistions.length; i++) {
       const transition = this.alphaTransistions[i]
       this.modes[transition.modeId].alpha = transition.ramp.update()
     }
     this.alphaTransistions = this.alphaTransistions.filter(val => val.ramp.isRunning())
+    if (!this.isTransitioning() && this.app) {
+      this.app.service('matrix').patch(this.index, { cmd: 'justFireEvent' })
+        .catch(err => console.error(err))
+    }
   }
 
-  setModeAlpha(modeId, alpha, transitionTime = 0) {
+  stopTransitions () {
+    this.alphaTransistions = []
+  }
+
+  setModeAlpha (modeId, alpha, transitionTime = 0) {
     if (transitionTime === 0) {
       this.modes[modeId].alpha = alpha
     } else {

@@ -43,7 +43,7 @@ for (let i = 0; i < confMatrices.length; i++) {
   if (matrix.type === 'UDP') {
     app.$matrices.push({
       name: matrix.name,
-      matrix: new UdpMatrix(matrix.width, matrix.height, matrix.host, matrix.port)
+      matrix: new UdpMatrix(matrix.width, matrix.height, app, i, matrix.host, matrix.port)
     })
   }
 }

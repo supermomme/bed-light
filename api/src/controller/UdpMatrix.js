@@ -3,8 +3,8 @@ const dgram = require('dgram')
 const colorBlend = require('color-blend')
 
 module.exports = class UdpMatrix extends Matrix {
-  constructor (_width, _height, _host, _port, _fps) {
-    super(_width, _height)
+  constructor (_width, _height, _app, _index, _host, _port, _fps) {
+    super(_width, _height, _app, _index)
     this.host = _host
     this.port = _port
     this.udpClient = dgram.createSocket('udp4')
@@ -16,7 +16,6 @@ module.exports = class UdpMatrix extends Matrix {
     this.bytesLastSecond = 0
 
     this.sendMatrix()
-    this.test = () => {}
   }
 
   test () { }
