@@ -12,7 +12,7 @@ exports.Info = {
       description: 'Cycle Time in milliseconds',
       type: 'number',
       canBeRandom: false,
-      triggerInit: true
+      triggerInit: false
     }
   }
 }
@@ -23,27 +23,21 @@ exports.class = class FullRainbow extends Template {
     this.Info = exports.Info
 
     this.defaultConfig.cycleTime = 120000
-    this.nextPhase = 0
-    this.r = new Ramp(255)
-    this.g = new Ramp(0)
-    this.b = new Ramp(0)
+    this.p = 0
 
     this.init()
   }
 
   setConfig (newConfig) {
     let reInit = false
-    if (newConfig.cycleTime && newConfig.cycleTime !== this.getConfig(newConfig.cycleTime)) reInit = true
+    // if (newConfig.cycleTime && newConfig.cycleTime !== this.getConfig(newConfig.cycleTime)) reInit = true
     super.setConfig(newConfig)
     if (reInit) this.init()
   }
 
   init() {
     this.destroy()
-    this.nextPhase = 0
-    this.r.go(255, 0, 'NONE', 'ONCEFORWARD')
-    this.g.go(0, 0, 'NONE', 'ONCEFORWARD')
-    this.b.go(0, 0, 'NONE', 'ONCEFORWARD')
+    this.p = 0
     super.init(true)
   }
 
@@ -52,10 +46,11 @@ exports.class = class FullRainbow extends Template {
     for (let x = 0; x < this.width; x++) {
       let column = []
       for (let y = 0; y < this.height; y++) {
+        let rgb = this.hslToRgb(this.p, 1, 0.5)
         column.push({
-          r: Math.round(this.r.update()),
-          g: Math.round(this.g.update()),
-          b: Math.round(this.b.update()),
+          r: rgb[0],
+          g: rgb[1],
+          b: rgb[2],
           a: 1
         })
       }
@@ -64,28 +59,32 @@ exports.class = class FullRainbow extends Template {
     return res
   }
 
-  update () {
-    if (this.r.isRunning() || this.g.isRunning() || this.b.isRunning()) return
-    switch (this.nextPhase) {
-    case 0:
-      this.r.go(0, Math.floor(this.getConfig('cycleTime')/3), 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
-      this.g.go(255, Math.floor(this.getConfig('cycleTime')/3), 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
-      this.nextPhase++
-      break
-    case 1:
-      this.g.go(0, Math.floor(this.getConfig('cycleTime')/3), 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
-      this.b.go(255, Math.floor(this.getConfig('cycleTime')/3), 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
-      this.nextPhase++
-      break
-    case 2:
-      this.b.go(0, Math.floor(this.getConfig('cycleTime')/3), 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
-      this.g.go(255, Math.floor(this.getConfig('cycleTime')/3), 'SINUSOIDAL_INOUT', 'ONCEFORWARD')
-      this.nextPhase = 0
-      break
-      
-    default:
-      this.nextPhase = 0
-      break
+  hslToRgb (h, s, l) {
+    var r, g, b;
+    if (s == 0) {
+      r = g = b = l // achromatic
+    } else {
+      var hue2rgb = function hue2rgb (p, q, t) {
+        if(t < 0) t += 1;
+        if(t > 1) t -= 1;
+        if(t < 1/6) return p + (q - p) * 6 * t;
+        if(t < 1/2) return q;
+        if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+        return p;
+      }
+  
+      var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+      var p = 2 * l - q;
+      r = hue2rgb(p, q, h + 1/3);
+      g = hue2rgb(p, q, h);
+      b = hue2rgb(p, q, h - 1/3);
     }
+  
+    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
   }
-} 
+
+  update () {
+    this.p += this.getConfig('fps') / this.getConfig('cycleTime')
+    if (this.p >= 1) this.p = 0
+  }
+}

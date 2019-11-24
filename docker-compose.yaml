@@ -25,3 +25,5 @@ services:
       - ./api/config:/app/config
     environment:
       - NODE_ENV=docker
+    ports:
+      - 33333:33333/udp

@@ -23,8 +23,8 @@ exports.Template = class Template {
     clearInterval(this.updateInterval)
   }
 
-  init () {
-    this.destroy()
+  init (alreadyDestroyed = false) {
+    if (!alreadyDestroyed) this.destroy()
     this.updateInterval = setInterval(() => this.update(), 1000/this.getConfig('fps'))
     this.initialized = true
   }

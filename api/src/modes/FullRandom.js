@@ -90,11 +90,12 @@ exports.class = class FullRandom extends Template {
     let res = []
     for (let x = 0; x < this.matrixR.length; x++) {
       res.push(this.matrixR[x].map((val) => {
+        let a = val.a.update()
         return {
-          r: val.r,
-          g: val.g,
-          b: val.b,
-          a: val.a.update()
+          r: a === 0 ? 0 : val.r,
+          g: a === 0 ? 0 : val.g,
+          b: a === 0 ? 0 : val.b,
+          a
         }
       }))
     }

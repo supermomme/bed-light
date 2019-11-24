@@ -41,7 +41,7 @@ module.exports = function(app) {
     // Here you can add event publishers to channels set up in `channels.js`
     // To publish only for a specific event use `app.publish(eventname, () => {})`
 
-    console.log(data); // eslint-disable-line
+    // console.log(data); // eslint-disable-line
 
     // e.g. to publish all service events to all authenticated users use
     return app.channel('anonymous', 'authenticated')

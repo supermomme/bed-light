@@ -67,21 +67,29 @@ module.exports = class UdpMatrix extends Matrix {
       }
       newMatrix.push(column)
     }
-
     for (const modeId in this.modes) {
       if (this.modes.hasOwnProperty(modeId)) {
         const mode = this.modes[modeId]
         const alpha = mode.alpha
-        if (alpha > 0) {
-          if (mode.mode.initialized) {
-            const matrix = mode.mode.getMatrix()
-            for (let x = 0; x < matrix.length; x++) {
-              for (let y = 0; y < matrix[x].length; y++) {
-                let a = matrix[x][y].a*alpha
-                newMatrix[x][y] = this.colorBlend(newMatrix[x][y], {
-                  ...matrix[x][y], a
-                })
+        if (alpha > 0 && mode.mode.initialized) {
+          const matrix = mode.mode.getMatrix()
+          for (let x = 0; x < matrix.length; x++) {
+            for (let y = 0; y < matrix[x].length; y++) {
+              let a = matrix[x][y].a*alpha
+              let background = {
+                r: newMatrix[x][y].r || 0,
+                g: newMatrix[x][y].g || 0,
+                b: newMatrix[x][y].b || 0,
+                a: newMatrix[x][y].a || 0
               }
+              let foreground = {
+                r: matrix[x][y].r || 0,
+                g: matrix[x][y].g || 0,
+                b: matrix[x][y].b || 0,
+                a: matrix[x][y].a*alpha || 0
+              }
+              let color = this.colorBlend(background, foreground)
+              if (color.r !== NaN && color.g !== NaN && color.b !== NaN && color.a !== NaN) newMatrix[x][y] = color
             }
           }
         }
