@@ -6,12 +6,12 @@ exports.Info = {
   description: '',
   config: {
     ...Config,
-    'repeat': {
-      name: 'Repeat',
-      description: 'Pattern to repeat',
+    'cycleTime': {
+      name: 'Cycle Time',
+      description: 'Cycle Time in milliseconds',
       type: 'number',
       canBeRandom: false,
-      triggerInit: true
+      triggerInit: false
     },
     'shift': {
       name: 'Shift',
@@ -37,7 +37,6 @@ exports.class = class AddressRainbow extends Template {
   constructor(_width, _height, _config) {
     super(_width, _height, _config)
     this.Info = exports.Info
-    // this.defaultConfig.repeat = 1
     this.defaultConfig.fps = 10
     this.defaultConfig.shift = 1
     this.defaultConfig.direction = 'Y'
@@ -51,7 +50,6 @@ exports.class = class AddressRainbow extends Template {
 
   setConfig (newConfig) {
     let reInit = false
-    // if (newConfig.repeat && newConfig.repeat !== this.getConfig(newConfig.repeat)) reInit = true
     if (newConfig.direction && newConfig.direction !== this.getConfig(newConfig.direction)) reInit = true
     super.setConfig(newConfig)
     if (reInit) this.init()

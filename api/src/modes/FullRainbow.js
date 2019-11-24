@@ -28,13 +28,6 @@ exports.class = class FullRainbow extends Template {
     this.init()
   }
 
-  setConfig (newConfig) {
-    let reInit = false
-    // if (newConfig.cycleTime && newConfig.cycleTime !== this.getConfig(newConfig.cycleTime)) reInit = true
-    super.setConfig(newConfig)
-    if (reInit) this.init()
-  }
-
   init() {
     this.destroy()
     this.p = 0

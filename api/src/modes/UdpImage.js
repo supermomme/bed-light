@@ -27,7 +27,7 @@ exports.class = class UdpImage extends Template {
 
   setConfig (newConfig) {
     let reInit = false
-    // if (newConfig.port && newConfig.port !== this.getConfig(newConfig.port)) reInit = true
+    if (newConfig.port && newConfig.port !== this.getConfig(newConfig.port)) reInit = true
     super.setConfig(newConfig)
     if (reInit) this.init()
   }
