@@ -10,7 +10,7 @@ services:
     environment:
       - VUE_APP_API_URL=http://api:3030
     volumes:
-      - ./client/src:/app/src
+      - ./web-client/src:/app/src
     ports:
       - 9090:8080
     depends_on:
