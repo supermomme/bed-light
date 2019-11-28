@@ -1,5 +1,6 @@
 const { Modes } = require('../modes.js')
 const Ramp = require('ramp.js')
+const colorBlend = require('color-blend')
 
 const allowedModes = [
   'AddressRainbow',
@@ -42,6 +43,70 @@ module.exports = class Matrix {
 
   isTransitioning () {
     return this.alphaTransistions.length > 0
+  }
+
+  colorBlend (A, B) {
+    return colorBlend.normal(A, B)
+  }
+  
+  pixelsToSend () {
+    // Init and fill newMatrix
+    let newMatrix = []
+    for (let x = 0; x < this.width; x++) {
+      let column = []
+      for (let y = 0; y < this.height; y++) {
+        column.push({ r: 0, g: 0, b: 0, a: 0 })
+      }
+      newMatrix.push(column)
+    }
+    for (const modeId in this.modes) {
+      if (this.modes.hasOwnProperty(modeId)) {
+        const mode = this.modes[modeId]
+        const alpha = mode.alpha
+        if (alpha > 0 && mode.mode.initialized) {
+          const matrix = mode.mode.getMatrix()
+          for (let x = 0; x < matrix.length; x++) {
+            for (let y = 0; y < matrix[x].length; y++) {
+              let a = matrix[x][y].a*alpha
+              let background = {
+                r: newMatrix[x][y].r || 0,
+                g: newMatrix[x][y].g || 0,
+                b: newMatrix[x][y].b || 0,
+                a: newMatrix[x][y].a || 0
+              }
+              let foreground = {
+                r: matrix[x][y].r || 0,
+                g: matrix[x][y].g || 0,
+                b: matrix[x][y].b || 0,
+                a: matrix[x][y].a*alpha || 0
+              }
+              let color = this.colorBlend(background, foreground)
+              if (!isNaN(color.r) && !isNaN(color.g) && !isNaN(color.b) && !isNaN(color.a)) newMatrix[x][y] = color
+            }
+          }
+        }
+      }
+    }
+
+    // Register pixels to send
+    let pixelsToSend = []
+    for (let x = 0; x < newMatrix.length; x++) {
+      for (let y = 0; y < newMatrix[x].length; y++) {
+        if (
+          newMatrix[x][y].r !== this.matrix[x][y].r ||
+          newMatrix[x][y].g !== this.matrix[x][y].g ||
+          newMatrix[x][y].b !== this.matrix[x][y].b ||
+          newMatrix[x][y].a !== this.matrix[x][y].a
+        ) {
+          let index = pixelsToSend.findIndex(n => n.x === x && n.y === y)
+          if (index === -1) pixelsToSend.push({ x, y })
+        }
+      }
+    }
+
+    // Set this.matrix to newMatrix
+    this.matrix = newMatrix
+    return pixelsToSend
   }
 
   updateAlphaTransistions () {

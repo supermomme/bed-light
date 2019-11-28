@@ -1,6 +1,5 @@
 const Matrix = require('./Matrix')
 const dgram = require('dgram')
-const colorBlend = require('color-blend')
 
 module.exports = class UdpMatrix extends Matrix {
   constructor (_width, _height, _app, _index, _host, _port, _fps) {
@@ -9,19 +8,13 @@ module.exports = class UdpMatrix extends Matrix {
     this.port = _port
     this.udpClient = dgram.createSocket('udp4')
     this.fps = _fps || 60
-    this.updateInterval = setInterval(() => this.update(), 1000/this.fps)
+    this.updateInterval = setInterval(() => this.sendMatrix(), 1000/this.fps)
     this.statInterval = setInterval(() => this.updateStats(), 1000)
 
     this.bytesPerSecond = 0
     this.bytesLastSecond = 0
 
-    this.sendMatrix()
-  }
-
-  test () { }
-
-  colorBlend (A, B) {
-    return colorBlend.normal(A, B)
+    this.sendMatrix(true)
   }
 
   updateStats () {
@@ -30,15 +23,18 @@ module.exports = class UdpMatrix extends Matrix {
     console.log(`Currently sending ${this.bytesPerSecond} bps`)
   }
 
-  sendMatrix(pixelsToSend) {
-    if (pixelsToSend === undefined) {
-      pixelsToSend = []
+  sendMatrix(sendAll = false) {
+    let pixelsToSend = []
+    if (sendAll) {
       for (let x = 0; x < this.width; x++) {
         for (let y = 0; y < this.height; y++) {
           pixelsToSend.push({x,y})
         }
       }
+    } else {
+      pixelsToSend = this.pixelsToSend()
     }
+
     let buffer = Buffer.alloc(pixelsToSend.length*5)
     for (let i = 0; i < pixelsToSend.length; i++) {
       const { x, y } = pixelsToSend[i]
@@ -55,68 +51,6 @@ module.exports = class UdpMatrix extends Matrix {
       if (err) throw err
       this.bytesLastSecond += bytes
     })
-  }
-  
-  update () {
-    // Init and fill newMatrix
-    let newMatrix = []
-    for (let x = 0; x < this.width; x++) {
-      let column = []
-      for (let y = 0; y < this.height; y++) {
-        column.push({ r: 0, g: 0, b: 0, a: 0 })
-      }
-      newMatrix.push(column)
-    }
-    for (const modeId in this.modes) {
-      if (this.modes.hasOwnProperty(modeId)) {
-        const mode = this.modes[modeId]
-        const alpha = mode.alpha
-        if (alpha > 0 && mode.mode.initialized) {
-          const matrix = mode.mode.getMatrix()
-          for (let x = 0; x < matrix.length; x++) {
-            for (let y = 0; y < matrix[x].length; y++) {
-              let a = matrix[x][y].a*alpha
-              let background = {
-                r: newMatrix[x][y].r || 0,
-                g: newMatrix[x][y].g || 0,
-                b: newMatrix[x][y].b || 0,
-                a: newMatrix[x][y].a || 0
-              }
-              let foreground = {
-                r: matrix[x][y].r || 0,
-                g: matrix[x][y].g || 0,
-                b: matrix[x][y].b || 0,
-                a: matrix[x][y].a*alpha || 0
-              }
-              let color = this.colorBlend(background, foreground)
-              if (color.r !== NaN && color.g !== NaN && color.b !== NaN && color.a !== NaN) newMatrix[x][y] = color
-            }
-          }
-        }
-      }
-    }
-
-    // Register pixels to send
-    let pixelsToSend = []
-    for (let x = 0; x < newMatrix.length; x++) {
-      for (let y = 0; y < newMatrix[x].length; y++) {
-        if (
-          newMatrix[x][y].r !== this.matrix[x][y].r ||
-          newMatrix[x][y].g !== this.matrix[x][y].g ||
-          newMatrix[x][y].b !== this.matrix[x][y].b ||
-          newMatrix[x][y].a !== this.matrix[x][y].a
-        ) {
-          let index = pixelsToSend.findIndex(n => n.x === x && n.y === y)
-          if (index === -1) pixelsToSend.push({ x, y })
-        }
-      }
-    }
-
-    // Set this.matrix to newMatrix
-    this.matrix = newMatrix
-    // if pixelsToSend then send
-    if (pixelsToSend.length === 0) return
-    this.sendMatrix(pixelsToSend)
   }
 
   destroy() {
