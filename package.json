@@ -4,11 +4,15 @@
   "description": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "docker-compose up --build"
+    "start": "docker-compose up --build",
+    "postinstall": "concurrently \"cd api && npm install\" \"cd web-client && npm install\""
   },
   "author": {
     "name": "Momme Jürgensen",
     "email": "momme@juergensen.me"
   },
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^3.6.1"
+  }
 }
