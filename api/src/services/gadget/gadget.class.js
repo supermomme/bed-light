@@ -1,8 +1,6 @@
 /* eslint-disable no-unused-vars */
 const { BadRequest } = require('@feathersjs/errors')
 
-const Modes = require('../../modes.js')
-
 exports.Gadget = class Gadget {
   constructor (options) {
     this.options = options || {}
@@ -59,7 +57,7 @@ exports.Gadget = class Gadget {
       this.app.$gadgets[id].gadget.stopTransitions()
       break
     case 'justFireEvent':
-      console.log('just fire event')
+      // console.log('just fire event')
       break
     default:
       return new BadRequest('Invalid cmd', {

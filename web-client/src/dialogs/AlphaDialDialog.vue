@@ -41,10 +41,10 @@
               max="1"
               step="0.01"
               :thumb-size="27"
-              :thumb-label="true"
+              thumb-label="always"
             >
               <template v-slot:thumb-label="value">
-                {{ Math.round(value.value*100)}}
+                {{ Math.round(value.value*100) }}
               </template>
             </v-slider>
           </v-col>
@@ -63,6 +63,14 @@
           Stop all transitions
         </v-btn>
         <v-spacer />
+        <v-btn
+          :disabled="gadget.isTransitioning"
+          color="primary"
+          outlined
+          @click="sendOff()"
+        >
+          Ausschalten
+        </v-btn>
         <v-btn
           :disabled="gadget.isTransitioning"
           color="primary"
@@ -108,6 +116,14 @@ export default {
       }
       this.$store.dispatch('gadget/patch', [this.$store.state.dialogMeta.gadgetId, data])
       this.closeDialog()
+    },
+    sendOff () {
+      for (const modeId in this.gadget.modes) {
+        if (this.gadget.modes.hasOwnProperty(modeId)) {
+          this.gadget.modes[modeId].alpha = 0
+        }
+      }
+      this.send()
     },
     stopAllTransitions () {
       this.$store.dispatch('gadget/patch', [this.$store.state.dialogMeta.gadgetId, {

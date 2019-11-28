@@ -1,6 +1,13 @@
 const { Modes } = require('../modes.js')
 const Ramp = require('ramp.js')
 
+const allowedModes = [
+  'AddressRainbow',
+  'FullRainbow',
+  'FullRandom',
+  'UdpImage'
+]
+
 module.exports = class Matrix {
   constructor (_width, _height, _app, _index) {
     this.width = _width
@@ -16,9 +23,9 @@ module.exports = class Matrix {
       this.matrix.push(column)
     }
 
-    this.modes = {}
+    this.modes = { }
     for (const key in Modes) {
-      if (Modes.hasOwnProperty(key)) {
+      if (Modes.hasOwnProperty(key) && allowedModes.indexOf(key) !== -1) {
         let mode = new Modes[key](this.width, this.height)
         this.modes[key] = {
           mode,
