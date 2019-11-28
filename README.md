@@ -1,6 +1,11 @@
-# rgb
-This is my UDP system addrassable rgb system.
+# Home Control
+This is Home Control. I use it to control diy wifi gadgets (RGB Strips/Matrices/Light).
 ## REPO Structure
-client = vue client
-api = socketio api and UDP client
-strip = different arduino sketches with a UDP server
+web-client = vue web client
+api = api for controling everything
+gadget-client = different sketches/scripts that control stuff
+
+## Todos
+add light(with switch) support
+add some security in the gadget communication
+add web authentication

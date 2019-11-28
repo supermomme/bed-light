@@ -2,7 +2,7 @@ version: "3"
 services:
   client:
     build:
-      context: ./client
+      context: ./web-client
       dockerfile: ./dev.Dockerfile
     container_name: client
     tty: true
