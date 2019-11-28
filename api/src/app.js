@@ -35,15 +35,15 @@ app.use('/', express.static(app.get('public')))
 app.configure(express.rest())
 app.configure(socketio())
 
-// Init Matrices
-app.$matrices = []
-let confMatrices = app.get('matrices')
-for (let i = 0; i < confMatrices.length; i++) {
-  const matrix = confMatrices[i]
-  if (matrix.type === 'UDP') {
-    app.$matrices.push({
-      name: matrix.name,
-      matrix: new UdpMatrix(matrix.width, matrix.height, app, i, matrix.host, matrix.port)
+// Init Gadgets
+app.$gadgets = []
+let confGadgets = app.get('gadgets')
+for (let i = 0; i < confGadgets.length; i++) {
+  const gadget = confGadgets[i]
+  if (gadget.type === 'UDPMatrix') {
+    app.$gadgets.push({
+      name: gadget.name,
+      gadget: new UdpMatrix(gadget.width, gadget.height, app, i, gadget.host, gadget.port)
     })
   }
 }

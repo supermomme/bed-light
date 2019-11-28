@@ -3,7 +3,7 @@ const { BadRequest } = require('@feathersjs/errors')
 
 const Modes = require('../../modes.js')
 
-exports.Matrix = class Matrix {
+exports.Gadget = class Gadget {
   constructor (options) {
     this.options = options || {}
   }
@@ -13,24 +13,24 @@ exports.Matrix = class Matrix {
   }
 
   async find (params) {
-    return this.app.$matrices.map(({name, matrix}, id) => {
+    return this.app.$gadgets.map(({name, gadget}, id) => {
       let modes = { }
-      for (const key in matrix.modes) {
-        if (matrix.modes.hasOwnProperty(key)) {
+      for (const key in gadget.modes) {
+        if (gadget.modes.hasOwnProperty(key)) {
           modes[key] = {
-            info: matrix.modes[key].info,
-            config: matrix.modes[key].config,
-            alpha: matrix.modes[key].alpha
+            info: gadget.modes[key].info,
+            config: gadget.modes[key].config,
+            alpha: gadget.modes[key].alpha
           }
         }
       }
       return {
         id,
         name,
-        width: matrix.width,
-        height: matrix.height,
+        width: gadget.width,
+        height: gadget.height,
         modes,
-        isTransitioning: matrix.isTransitioning()
+        isTransitioning: gadget.isTransitioning()
       }
     })
   }
@@ -43,20 +43,20 @@ exports.Matrix = class Matrix {
     switch (cmd) {
     case 'setModeAlpha':
       if (modes === undefined) {
-        this.app.$matrices[id].matrix.setModeAlpha(modeId, data, transitionTime)
+        this.app.$gadgets[id].gadget.setModeAlpha(modeId, data, transitionTime)
       } else {
         for (const mId in modes) {
           if (modes.hasOwnProperty(mId)) {
-            this.app.$matrices[id].matrix.setModeAlpha(mId, modes[mId], transitionTime)
+            this.app.$gadgets[id].gadget.setModeAlpha(mId, modes[mId], transitionTime)
           }
         }
       }
       break
     case 'setModeConfig':
-      this.app.$matrices[id].matrix.setModeConfig(modeId, data)
+      this.app.$gadgets[id].gadget.setModeConfig(modeId, data)
       break
     case 'stopTransitions':
-      this.app.$matrices[id].matrix.stopTransitions()
+      this.app.$gadgets[id].gadget.stopTransitions()
       break
     case 'justFireEvent':
       console.log('just fire event')

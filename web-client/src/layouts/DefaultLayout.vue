@@ -32,7 +32,7 @@
       clipped-left
     >
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <v-toolbar-title>RGB Matrix</v-toolbar-title>
+      <v-toolbar-title>Home Control</v-toolbar-title>
     </v-app-bar>
     <v-content>
       <slot />

@@ -16,7 +16,7 @@
         <v-row>
           <v-col cols="12">
             <v-text-field
-              :disabled="matrix.isTransitioning"
+              :disabled="gadget.isTransitioning"
               v-model="transition"
               label="Transition time in ms"
             >
@@ -32,9 +32,9 @@
               </template>
             </v-text-field>
           </v-col>
-          <v-col cols="12" v-for="(mode, name) in matrix.modes" :key="mode.id">
+          <v-col cols="12" v-for="(mode, name) in gadget.modes" :key="mode.id">
             <v-slider
-              :disabled="matrix.isTransitioning"
+              :disabled="gadget.isTransitioning"
               v-model="mode.alpha"
               :label="name"
               min="0"
@@ -55,7 +55,7 @@
 
       <v-card-actions>
         <v-btn
-          v-if="matrix.isTransitioning"
+          v-if="gadget.isTransitioning"
           color="error"
           depressed
           @click="stopAllTransitions()"
@@ -64,7 +64,7 @@
         </v-btn>
         <v-spacer />
         <v-btn
-          :disabled="matrix.isTransitioning"
+          :disabled="gadget.isTransitioning"
           color="primary"
           outlined
           @click="send()"
@@ -86,8 +86,8 @@ export default {
     }
   },
   computed: {
-    matrix () {
-      return this.$store.getters['matrix/get'](this.$store.state.dialogMeta.matrixId)
+    gadget () {
+      return this.$store.getters['gadget/get'](this.$store.state.dialogMeta.gadgetId)
     }
   },
   methods: {
@@ -101,16 +101,16 @@ export default {
         'transitionTime': this.transition
       }
 
-      for (const modeId in this.matrix.modes) {
-        if (this.matrix.modes.hasOwnProperty(modeId)) {
-          data.modes[modeId] = this.matrix.modes[modeId].alpha
+      for (const modeId in this.gadget.modes) {
+        if (this.gadget.modes.hasOwnProperty(modeId)) {
+          data.modes[modeId] = this.gadget.modes[modeId].alpha
         }
       }
-      this.$store.dispatch('matrix/patch', [this.$store.state.dialogMeta.matrixId, data])
+      this.$store.dispatch('gadget/patch', [this.$store.state.dialogMeta.gadgetId, data])
       this.closeDialog()
     },
     stopAllTransitions () {
-      this.$store.dispatch('matrix/patch', [this.$store.state.dialogMeta.matrixId, {
+      this.$store.dispatch('gadget/patch', [this.$store.state.dialogMeta.gadgetId, {
         cmd: 'stopTransitions'
       }])
     }

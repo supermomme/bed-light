@@ -1,12 +1,12 @@
-// src/store/services/matrix.js
+// src/store/services/gadget.js
 import feathersClient, { makeServicePlugin, BaseModel } from '../feathers-client'
 
-class Matrix extends BaseModel {
-  static modelName = 'Matrix'
+class Gadget extends BaseModel {
+  static modelName = 'Gadget'
 }
-const servicePath = 'matrix'
+const servicePath = 'gadget'
 const servicePlugin = makeServicePlugin({
-  Model: Matrix,
+  Model: Gadget,
   service: feathersClient.service(servicePath),
   servicePath
 })

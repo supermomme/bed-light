@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <v-container>
-      <v-btn v-for="matrix in matrices" :key="matrix.id" outlined large color="primary" @click="openSelectModeDialog(matrix.id)">{{ matrix.name }}</v-btn>
+      <v-btn v-for="gadget in gadgets" :key="gadget.id" outlined large color="primary" @click="openSelectModeDialog(gadget.id)">{{ gadget.name }}</v-btn>
     </v-container>
   </div>
 </template>
@@ -17,17 +17,17 @@ export default {
     }
   },
   computed: {
-    matrices () {
-      return this.$store.getters['matrix/list']
+    gadgets () {
+      return this.$store.getters['gadget/list']
     }
   },
   methods: {
-    openSelectModeDialog (matrixId) {
-      this.$store.commit('setDialogMeta', { matrixId })
+    openSelectModeDialog (gadgetId) {
+      this.$store.commit('setDialogMeta', { gadgetId })
       this.$store.commit('openDialog', 'AlphaDialDialog')
     },
     async fetch () {
-      await this.$store.dispatch('matrix/find')
+      await this.$store.dispatch('gadget/find')
       await this.$store.dispatch('mode/find')
       console.log('fetch')
     }

@@ -45,7 +45,7 @@ module.exports = class Matrix {
     }
     this.alphaTransistions = this.alphaTransistions.filter(val => val.ramp.isRunning())
     if (!this.isTransitioning() && this.app) {
-      this.app.service('matrix').patch(this.index, { cmd: 'justFireEvent' })
+      this.app.service('gadget').patch(this.index, { cmd: 'justFireEvent' })
         .catch(err => console.error(err))
     }
   }

@@ -1,6 +1,6 @@
-// Initializes the `matrix` service on path `/matrix`
-const { Matrix } = require('./matrix.class')
-const hooks = require('./matrix.hooks')
+// Initializes the `gadget` service on path `/gadget`
+const { Gadget } = require('./gadget.class')
+const hooks = require('./gadget.hooks')
 
 module.exports = function (app) {
   const options = {
@@ -8,10 +8,10 @@ module.exports = function (app) {
   }
 
   // Initialize our service with any options it requires
-  app.use('/matrix', new Matrix(options, app))
+  app.use('/gadget', new Gadget(options, app))
 
   // Get our initialized service so that we can register hooks
-  const service = app.service('matrix')
+  const service = app.service('gadget')
 
   service.hooks(hooks)
 }
