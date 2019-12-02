@@ -1,11 +1,13 @@
 /*
- * Author: Momme Jürgense
+ * Author: Momme Jürgensen
  * Description: UDP Server that controls two WS2912B. This is a part of my UDP System
  * Repo: https://github.com/supermomme/bed-light
  * Platform: NODEMCU ESP8266
  * Pins:
- * D1 hears on UDP id 0x00
- * D1 hears on UDP id 0x01
+ * D1 strip 1
+ * D2 strip 2
+ * 
+ * Disclaymer: This sketch is not perfect and will be refactored in the future
 */
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
