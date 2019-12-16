@@ -15,7 +15,9 @@ const middleware = require('./middleware')
 const services = require('./services')
 const appHooks = require('./app.hooks')
 const channels = require('./channels')
-const UdpMatrix = require('./controller/UdpMatrix')
+const controller = require('./controller')
+
+const mongoose = require('./mongoose')
 
 const app = express(feathers())
 
@@ -36,6 +38,7 @@ app.configure(express.rest())
 app.configure(socketio())
 
 // Init Gadgets
+/*
 app.$gadgets = []
 let confGadgets = app.get('gadgets')
 for (let i = 0; i < confGadgets.length; i++) {
@@ -47,6 +50,8 @@ for (let i = 0; i < confGadgets.length; i++) {
     })
   }
 }
+*/
+app.configure(mongoose)
 
 // Configure other middleware (see `middleware/index.js`)
 app.configure(middleware)
@@ -60,5 +65,7 @@ app.use(express.notFound())
 app.use(express.errorHandler({ logger }))
 
 app.hooks(appHooks)
+
+app.configure(controller)
 
 module.exports = app

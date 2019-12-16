@@ -1,9 +1,11 @@
 // Initializes the `gadget` service on path `/gadget`
 const { Gadget } = require('./gadget.class')
+const createModel = require('./gadget.model')
 const hooks = require('./gadget.hooks')
 
 module.exports = function (app) {
   const options = {
+    Model: createModel(app),
     paginate: app.get('paginate')
   }
 

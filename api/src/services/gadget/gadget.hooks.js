@@ -1,3 +1,4 @@
+const { preventChanges } = require('feathers-hooks-common')
 
 
 module.exports = {
@@ -6,8 +7,8 @@ module.exports = {
     find: [],
     get: [],
     create: [],
-    update: [],
-    patch: [],
+    update: [ preventChanges(true, 'senderType'), preventChanges(true, 'backendType') ],
+    patch: [ preventChanges(true, 'senderType'), preventChanges(true, 'backendType') ],
     remove: []
   },
 

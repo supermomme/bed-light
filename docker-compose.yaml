@@ -27,3 +27,15 @@ services:
       - NODE_ENV=docker
     ports:
       - 33333:33333/udp
+  mongo:
+    image: mongo:3.6
+    container_name: mongo
+    volumes:
+       - mongodb-data:/data/db
+    ports:
+      - 27017:27017
+    logging:
+      driver: none
+
+volumes:
+  mongodb-data:
