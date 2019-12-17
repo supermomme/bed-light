@@ -57,9 +57,9 @@ void loop() {
         client.readBytes(packet, packetSize);
         // Serial.println(packet[0]);
         if (packet[0] == 0x01) { // ask for config
-          client.print("CONFIG:m=Matrix;w=2;h=60"); // answer config
+          client.print("CONFIG:m=Matrix;w=2;h=60;n=Bed"); // answer config
         } else if (packet[0] == 0x02){
-          client.print("Smiley :)");
+          // client.print("Smiley :)");
           // mode specific handling (my mode is "Matrix"
           bool updateStrip0 = false;
           bool updateStrip1 = false;
@@ -92,7 +92,6 @@ void loop() {
           }
           if (updateStrip0) strip0.show();
           if (updateStrip1) strip1.show();
-      
         }
       }
       delay(10);
