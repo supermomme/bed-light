@@ -80,12 +80,13 @@ void loop() {
             Serial.print(packet[p-1], HEX);
             Serial.println();
             */
-            if (packet[i*5-5] == 0x00) {
-              strip0.setPixelColor(packet[i*5-4], packet[i*5-3], packet[i*5-2], packet[i*5-1]);
+                        
+            if (packet[p-5] == 0x00) {
+              strip0.setPixelColor(packet[p-4], packet[p-3], packet[p-2], packet[p-1]);
               updateStrip0 = true;
               
-            } else if (packet[i*5-5] == 0x01) {
-              strip1.setPixelColor(packet[i*5-4], packet[i*5-3], packet[i*5-2], packet[i*5-1]);
+            } else if (packet[p-5] == 0x01) {
+              strip1.setPixelColor(packet[p-4], packet[p-3], packet[p-2], packet[p-1]);
               updateStrip1 = true;
             }
           }
