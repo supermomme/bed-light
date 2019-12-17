@@ -7,7 +7,7 @@ module.exports = function (app) {
   const { Schema } = mongooseClient
   const integration = new Schema({
     type: { type: String, required: true, enum: [ 'espMomme' ], immutable: true },
-    config: { type: Schema.Types.Mixed, default: {} } // TODO: edgecase: patch config
+    config: { type: Schema.Types.Mixed, default: {} } // EDGECASE: edgecase: patch config
   }, {
     timestamps: true,
     minimize: false

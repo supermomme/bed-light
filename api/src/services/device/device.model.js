@@ -7,6 +7,8 @@ module.exports = function (app) {
   const { Schema } = mongooseClient
   const device = new Schema({
     integrationId: { type: Schema.Types.ObjectId, required: true, immutable: true },
+    deviceName: { type: String, required: true, immutable: true, unique: true },
+    type: { type: String, required: true, immutable: true },
     state: { type: Schema.Types.Mixed, default: {} }
   }, {
     timestamps: true
