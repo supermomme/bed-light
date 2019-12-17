@@ -1,7 +1,10 @@
-const gadget = require('./gadget/gadget.service.js')
-const mode = require('./mode/mode.service.js')
+
+const integration = require('./integration/integration.service.js')
+const device = require('./device/device.service.js')
+const deviceLog = require('./device-log/device-log.service.js')
 // eslint-disable-next-line no-unused-vars
 module.exports = function (app) {
-  app.configure(gadget)
-  app.configure(mode)
+  app.configure(integration)
+  app.configure(device)
+  app.configure(deviceLog)
 }

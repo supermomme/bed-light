@@ -15,5 +15,6 @@
       "host": "10.0.80.21",
       "port": "33333"
     }
-  ]
+  ],
+  "mongodb": "mongodb://mongo:27017/home_control"
 }

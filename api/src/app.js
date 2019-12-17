@@ -10,12 +10,13 @@ const configuration = require('@feathersjs/configuration')
 const express = require('@feathersjs/express')
 const socketio = require('@feathersjs/socketio')
 
-
 const middleware = require('./middleware')
 const services = require('./services')
 const appHooks = require('./app.hooks')
 const channels = require('./channels')
-const UdpMatrix = require('./controller/UdpMatrix')
+
+const mongoose = require('./mongoose')
+const setupIntegration = require('./integration/setup')
 
 const app = express(feathers())
 
@@ -35,18 +36,7 @@ app.use('/', express.static(app.get('public')))
 app.configure(express.rest())
 app.configure(socketio())
 
-// Init Gadgets
-app.$gadgets = []
-let confGadgets = app.get('gadgets')
-for (let i = 0; i < confGadgets.length; i++) {
-  const gadget = confGadgets[i]
-  if (gadget.type === 'UDPMatrix') {
-    app.$gadgets.push({
-      name: gadget.name,
-      gadget: new UdpMatrix(gadget.width, gadget.height, app, i, gadget.host, gadget.port)
-    })
-  }
-}
+app.configure(mongoose)
 
 // Configure other middleware (see `middleware/index.js`)
 app.configure(middleware)
@@ -60,5 +50,7 @@ app.use(express.notFound())
 app.use(express.errorHandler({ logger }))
 
 app.hooks(appHooks)
+
+app.configure(setupIntegration)
 
 module.exports = app
