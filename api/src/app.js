@@ -16,7 +16,7 @@ const appHooks = require('./app.hooks')
 const channels = require('./channels')
 
 const mongoose = require('./mongoose')
-const setupIntegration = require('./integration/setup')
+const initIntegration = require('./initIntegration')
 
 const app = express(feathers())
 
@@ -51,6 +51,6 @@ app.use(express.errorHandler({ logger }))
 
 app.hooks(appHooks)
 
-app.configure(setupIntegration)
+app.configure(initIntegration)
 
 module.exports = app

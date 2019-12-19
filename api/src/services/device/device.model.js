@@ -6,12 +6,14 @@ module.exports = function (app) {
   const mongooseClient = app.get('mongooseClient')
   const { Schema } = mongooseClient
   const device = new Schema({
-    integrationId: { type: Schema.Types.ObjectId, required: true, immutable: true },
-    deviceName: { type: String, required: true, immutable: true, unique: true },
-    type: { type: String, required: true, immutable: true },
-    state: { type: Schema.Types.Mixed, default: {} }
+    integrationId: { type: Schema.Types.ObjectId, required: true }, // should only be writte by integration-class
+    deviceName: { type: String, required: true, immutable: true, unique: true }, // should never be overwritten
+    type: { type: String, required: true }, // should only be writte by integration-class
+    state: { type: Schema.Types.Mixed, default: {} }, // can be overwritten by enduser
+    config: { type: Schema.Types.Mixed, default: {} } // should only be writte by integration-class
   }, {
-    timestamps: true
+    timestamps: true,
+    minimize: false
   })
 
   // This is necessary to avoid model compilation errors in watch mode
