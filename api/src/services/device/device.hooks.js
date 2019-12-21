@@ -1,5 +1,3 @@
-const patchDeviceState = require('./hooks/patch-device-state')
-
 module.exports = {
   before: {
     all: [],
@@ -16,8 +14,8 @@ module.exports = {
     find: [],
     get: [],
     create: [],
-    update: [ patchDeviceState() ],
-    patch: [ patchDeviceState() ],
+    update: [],
+    patch: [],
     remove: []
   },
 
