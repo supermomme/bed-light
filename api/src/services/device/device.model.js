@@ -10,7 +10,9 @@ module.exports = function (app) {
     deviceName: { type: String, required: true, immutable: true, unique: true }, // should never be overwritten
     type: { type: String, required: true }, // should only be writte by integration-class
     state: { type: Schema.Types.Mixed, default: {} }, // can be overwritten by enduser
-    config: { type: Schema.Types.Mixed, default: {} } // should only be writte by integration-class
+    config: { type: Schema.Types.Mixed, default: {} }, // should only be writte by integration-class
+    status: { type: String, default: 'UNKNOWN'}, // should only be writte by integration-class
+    statusMessage: { type: String, default: 'Status is unkown' } // should only be writte by integration-class
   }, {
     timestamps: true,
     minimize: false
