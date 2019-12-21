@@ -1,12 +1,12 @@
-// src/store/services/gadget.js
+// src/store/services/integration.js
 import feathersClient, { makeServicePlugin, BaseModel } from '../feathers-client'
 
-class Gadget extends BaseModel {
-  static modelName = 'Gadget'
+class Integration extends BaseModel {
+  static modelName = 'Integration'
 }
-const servicePath = 'gadget'
+const servicePath = 'integration'
 const servicePlugin = makeServicePlugin({
-  Model: Gadget,
+  Model: Integration,
   service: feathersClient.service(servicePath),
   servicePath
 })

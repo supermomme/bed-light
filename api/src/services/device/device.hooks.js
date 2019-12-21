@@ -1,3 +1,5 @@
+const attachInfo = require('./hooks/attach-info')
+
 module.exports = {
   before: {
     all: [],
@@ -10,7 +12,7 @@ module.exports = {
   },
 
   after: {
-    all: [],
+    all: [ attachInfo() ],
     find: [],
     get: [],
     create: [],

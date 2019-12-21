@@ -2,11 +2,13 @@
 // 
 // See http://mongoosejs.com/docs/models.html
 // for more of what you can do here.
+const integrationClasses = require('../../integration')
+
 module.exports = function (app) {
   const mongooseClient = app.get('mongooseClient')
   const { Schema } = mongooseClient
   const integration = new Schema({
-    type: { type: String, required: true, enum: [ 'esp' ], immutable: true },
+    type: { type: String, required: true, enum: Object.keys(integrationClasses), immutable: true },
     config: { type: Schema.Types.Mixed, default: {} },
     status: { type: String, default: 'UNKNOWN'},
     statusMessage: { type: String, default: 'Status is unkown' }
