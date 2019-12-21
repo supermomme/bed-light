@@ -22,7 +22,7 @@ IPAddress subnet(255,255,0,0);
 const char* host = "10.0.0.12";
 const uint16_t port = 33333;
 
-String configString = "MODE=LIGHT_SWITCH";
+String configString = "TYPE=LIGHT_SWITCH;NAME=MainLight";
 int retryCountDown = 0;
 
 WiFiClient client;
@@ -91,6 +91,9 @@ void loop() {
           Serial.println(light);
           
         }
+      } else if (payload == "REQ_UPDATE") {
+        // READ OUTPUT instead of light
+        client.print("UPDATE:ENABLE="+(String)(light ? "1" : "0"));
       }
     }
   } else {
