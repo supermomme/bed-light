@@ -1,10 +1,10 @@
 const Net = require('net')
-const device = require('./device')
+const Device = require('./device')
 const logger = require('../../logger')
 
 module.exports = class Integration {
   constructor (integrationId, app) {
-    this.id = integrationId
+    this.id = integrationId.toString()
     this.app = app
 
     this.device = {}
@@ -36,10 +36,10 @@ module.exports = class Integration {
         if (config.TYPE != undefined && config.NAME != undefined) {
           deviceName = config.NAME
           let dbDevices = (await this.app.service('device').find({ query: { deviceName: config.NAME }})).data
-
+          let dev = null
           if (dbDevices.length === 0) {
             // CREATE
-            await this.app.service('device').create({
+            dev = await this.app.service('device').create({
               deviceName: config.NAME,
               integrationId: this.id,
               type: config.TYPE,
@@ -48,9 +48,9 @@ module.exports = class Integration {
               statusMessage: 'Device and Home Control are getting prepared'
             })
           } else {
-            if (dbDevices[0].type === config.TYPE && dbDevices[0].integrationId === this.id) {
+            if (dbDevices[0].type === config.TYPE && dbDevices[0].integrationId.toString() === this.id) {
               // PATCH
-              await this.app.service('device').patch(dbDevices[0]._id, {
+              dev = await this.app.service('device').patch(dbDevices[0]._id, {
                 config: filteredConfig,
                 status: 'INITIALIZING',
                 statusMessage: 'Device and Home Control are getting prepared'
@@ -59,7 +59,7 @@ module.exports = class Integration {
               // DELETE
               await this.app.service('device').remove(dbDevices[0]._id)
               // CREATE
-              await this.app.service('device').create({
+              dev = await this.app.service('device').create({
                 deviceName: config.NAME,
                 integrationId: this.id,
                 type: config.TYPE,
@@ -71,7 +71,12 @@ module.exports = class Integration {
           }
           
           // TODO: init device class
-
+          if (Object.keys(Device).indexOf(dev.type) != -1) {
+            this.device[dev._id] = new Device[dev.type](dev._id, socket, this.app)
+          } else {
+            // Update Device Status
+            logger.error(`Device Type '${dev.type}' in device '${dev.name}' in integration '${dev.integrationId}' not found`)
+          }
         }
       }
     }
@@ -121,29 +126,6 @@ module.exports = class Integration {
     socket.on('error', (err) => {
       console.log(`Error: ${err}`)
     });
-  }
-
-  async syncDevice() {
-    return // need to be deleted; but usefull for one TODO
-    // add missing classes
-    let devices = (await this.app.service('device').find({ query: { integrationId: this.id } })).data
-    for (let i = 0; i < devices.length; i++) {
-      if (this.device[devices[i]._id] == undefined) {
-        if (device[devices[i].type] == undefined) {
-          logger.error(`Device Type ${devices[i].type} in device ${devices[i].name} in integration ${devices[i].integrationId} not found`)
-        } else {
-          this.device[devices[i]._id] = new device[devices[i].type](devices[i]._id, this.app)
-        }
-      }
-    }
-
-    // Delete removed ones
-    for (const id in this.device) {
-      if ((await this.app.service('device').find({ query: { _id: id } })).total === 0) {
-        this.device[id].destroy()
-        delete this.device[id]
-      }
-    }
   }
 
   destroy () {
