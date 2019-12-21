@@ -6,7 +6,7 @@ module.exports = function (app) {
   const mongooseClient = app.get('mongooseClient')
   const { Schema } = mongooseClient
   const integration = new Schema({
-    type: { type: String, required: true, enum: [ 'espMomme' ], immutable: true },
+    type: { type: String, required: true, enum: [ 'esp' ], immutable: true },
     config: { type: Schema.Types.Mixed, default: {} },
     status: { type: String, default: 'UNKNOWN'},
     statusMessage: { type: String, default: 'Status is unkown' }
