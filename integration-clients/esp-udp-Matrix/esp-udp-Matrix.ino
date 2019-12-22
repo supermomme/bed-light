@@ -32,8 +32,8 @@ int pingCheckCountDown = 0;
 WiFiClient client;
 WiFiUDP Udp;
 
-Adafruit_NeoPixel strip0(60, 0, NEO_GRB + NEO_KHZ800);
-Adafruit_NeoPixel strip1(60, 2, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip0(60, D1, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip1(60, D2, NEO_GRB + NEO_KHZ800);
 
 void setup() {
   Serial.begin(115200);
@@ -105,7 +105,7 @@ void loop() {
           
           if(X != -1 && Y != -1 && R != -1 && G != -1 && B != -1) {
             
-            
+            /*
             Serial.print("X: ");
             Serial.print(X);
             Serial.print(" Y: ");
@@ -117,7 +117,7 @@ void loop() {
             Serial.print(" B: ");
             Serial.print(B);
             Serial.println();
-            
+            */
 
             if (X == 0) {
               strip0.setPixelColor(Y, R, G, B);
