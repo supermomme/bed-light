@@ -55,6 +55,8 @@ void setup() {
 }
 
 void loop() {
+  bool updateStrip0 = false;
+  bool updateStrip1 = false;
   if (client.connected()) {
     if (client.available() > 0) {
       String payload = client.readStringUntil('\n');
@@ -79,8 +81,6 @@ void loop() {
           float R = -1;
           float G = -1;
           float B = -1;
-          bool updateStrip0 = false;
-          bool updateStrip1 = false;
           
           while (toInspect.length()) {
             
@@ -124,8 +124,6 @@ void loop() {
               }
             }
           }
-          if (updateStrip0) strip0.show();
-          if (updateStrip1) strip1.show();
         }
       }
     }
@@ -141,5 +139,7 @@ void loop() {
       }
     }
   }
+  if (updateStrip0) strip0.show();
+  if (updateStrip1) strip1.show();
   delay(1);
 }

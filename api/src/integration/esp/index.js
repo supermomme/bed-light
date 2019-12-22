@@ -12,6 +12,19 @@ module.exports = class Integration {
     this.server = new Net.Server()
     this.server.on('connection', (socket) => this.handleConnect(socket))
     this.server.listen(33333)
+
+    // set all device to DISCONNECTED
+    this.app.service('device').find({ query: { integrationId: this.id }})
+      .then(res => {
+        let prom = []
+        for (let i = 0; i < res.data.length; i++) {
+          prom.push(this.app.service('device').patch(res.data[i]._id, {
+            status: 'DISCONNECTED',
+            statusMessage: 'Device is disconnected'
+          }))
+        }
+        return Promise.all(prom)
+      })
   }
 
   handleConnect (socket) {
@@ -70,9 +83,8 @@ module.exports = class Integration {
             }
           }
           
-          // TODO: init device class
           if (Object.keys(Device).indexOf(dev.type) != -1) {
-            this.device[dev._id] = new Device[dev.type](dev._id, socket, this.app)
+            this.device[dev._id] = new Device[dev.type](dev._id, socket, this.app, dev)
           } else {
             // Update Device Status
             logger.error(`Device Type '${dev.type}' in device '${dev.name}' in integration '${dev.integrationId}' not found`)

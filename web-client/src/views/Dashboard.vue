@@ -14,18 +14,33 @@
             <v-card-text>
               <div v-for="component in device.frontendComponents" :key="component.key">
                 <template v-if="component.type === 'SWITCH'">
-                  <!--toggleDeviceState(device._id, component.key)-->
+                  {{ device.state[component.key] == true }}
                   <v-switch
                     :disabled="device.status != 'CONNECTED'"
-                    v-model="device.state[component.key]"
+                    :input-value="component.key.split('.').reduce((o, v) => o[v], device.state)"
                     :label="`Turned ${device.state[component.key] ? 'on' : 'off'}`"
-                    @change="patchDeviceState(device._id, device.state)"
+                    @change="patchDeviceState(device._id, device.state, component.key, $event)"
                   ></v-switch>
                 </template>
+
+                <template v-else-if="component.type === 'SLIDER'">
+                  <!--toggleDeviceState(device._id, component.key)-->
+                  <v-slider
+                    :disabled="device.status != 'CONNECTED'"
+                    :value="component.key.split('.').reduce((o, v) => o[v], device.state)"
+                    :label="component.label"
+                    @change="patchDeviceState(device._id, device.state, component.key, $event)"
+                    :min="component.min"
+                    :max="component.max"
+                    step="0.01"
+                  ></v-slider>
+                </template>
+
               </div>
               <v-alert :type="errorType(device.status)" v-if="device.status != 'CONNECTED'" prominent>
                 {{ device.statusMessage }}
               </v-alert>
+              <pre>{{ device}}</pre>
             </v-card-text>
           </v-list-item-content>
         </v-list-item>
@@ -35,6 +50,7 @@
 </template>
 
 <script>
+let _ = require('lodash')
 
 export default {
   name: 'Dashboard',
@@ -54,12 +70,9 @@ export default {
       if (status === 'INITIALIZING') return 'warning'
       return 'error'
     },
-    patchDeviceState (id, state) {
-      console.log('patch', id, state)
-      this.$store.dispatch('device/patch', [
-        id,
-        { state }
-      ])
+    patchDeviceState (id, state, key, newVal) {
+      _.set(state, key, newVal)
+      this.$store.dispatch('device/patch', [ id, { state } ])
     },
     openSelectModeDialog (gadgetId) {
       this.$store.commit('setDialogMeta', { gadgetId })
@@ -71,4 +84,5 @@ export default {
     }
   }
 }
+
 </script>

@@ -1,6 +1,6 @@
 const logger = require('../../../../logger')
 
-module.exports = class Integration {
+module.exports = class Light_Switch {
   constructor (deviceId, socket, app) {
     this.id = deviceId
     this.socket = socket
