@@ -1,5 +1,5 @@
 
 
 module.exports = {
-  esp: require('./esp-udp/info')
+  esp: require('./esp/info')
 }
