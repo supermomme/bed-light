@@ -4,12 +4,14 @@ const Modes = require('./mode')
 const colorBlend = require('color-blend')
 
 module.exports = class Matrix {
-  constructor (deviceId, app, dbDevice) {
+  constructor (deviceId, _socket, app, dbDevice) {
     this.id = deviceId.toString()
     this.app = app
     this.udpSocket = dgram.createSocket('udp4')
     this.width = dbDevice.config.WIDTH
     this.height = dbDevice.config.HEIGHT
+    this.udpPort = dbDevice.config.PORT
+    this.udpHost = dbDevice.config.HOST
     this.matrix = []
     for (let x = 0; x < this.width; x++) {
       let column = []
@@ -44,7 +46,7 @@ module.exports = class Matrix {
       state: { alpha }
     })
 
-    this.updateInterval = setInterval(() => this.send(), 1000/0.5)
+    this.updateInterval = setInterval(() => this.send(), 1000/60)
   }
 
   async handlePatch (data) {
@@ -153,6 +155,6 @@ module.exports = class Matrix {
 
   destroy () {
     clearInterval(this.updateInterval)
-    this.socket.destroy()
+    this.udpSocket.close()
   }
 }

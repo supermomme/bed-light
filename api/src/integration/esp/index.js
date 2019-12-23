@@ -11,7 +11,7 @@ module.exports = class Integration {
     this.port = 33333
     this.server = new Net.Server()
     this.server.on('connection', (socket) => this.handleConnect(socket))
-    this.server.listen(33333)
+    this.server.listen(this.port)
 
     // set all device to DISCONNECTED
     this.app.service('device').find({ query: { integrationId: this.id }})
@@ -42,9 +42,9 @@ module.exports = class Integration {
         const filteredConfig = Object.keys(config)
           .filter(key => !(['TYPE', 'NAME'].includes(key)))
           .reduce((obj, key) => {
-            obj[key] = config[key];
-            return obj;
-          }, {});
+            obj[key] = config[key]
+            return obj
+          }, {})
 
         if (config.TYPE != undefined && config.NAME != undefined) {
           deviceName = config.NAME
@@ -112,7 +112,7 @@ module.exports = class Integration {
     socket.on('timeout', () => {
       console.log('socket timeout')
       socket.destroy()
-    });
+    })
 
     const destroyDevice = async () => {
       let device = (await this.app.service('device').find({ query: { deviceName }})).data[0]
@@ -133,11 +133,11 @@ module.exports = class Integration {
       clearInterval(pingInterval)
       
       destroyDevice().catch(err => console.error(err))
-    });
+    })
 
     socket.on('error', (err) => {
       console.log(`Error: ${err}`)
-    });
+    })
   }
 
   destroy () {
