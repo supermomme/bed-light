@@ -103,17 +103,6 @@ exports.class = class FullRandom extends Template {
   setConfig (newConfig) {
     let reInit = false
     super.setConfig(newConfig)
-    if (Number(newConfig.probability) && Number(newConfig.probability) !== this.getConfig('probability')) this.config.probability = Number(newConfig.probability)
-    if (Number(newConfig.fadeout) && Number(newConfig.fadeout) !== this.getConfig('fadeout')) this.config.fadeout = Number(newConfig.fadeout)
-    if (newConfig.colorR && (newConfig.colorR[0] !== this.getConfig('colorR')[0] || newConfig.colorR[1] !== this.getConfig('colorR')[1])) {
-      this.config.colorR = newConfig.colorR
-    }
-    if (newConfig.colorG && (newConfig.colorG[0] !== this.getConfig('colorG')[0] || newConfig.colorG[1] !== this.getConfig('colorG')[1])) {
-      this.config.colorG = newConfig.colorG
-    }
-    if (newConfig.colorB && (newConfig.colorB[0] !== this.getConfig('colorB')[0] || newConfig.colorB[1] !== this.getConfig('colorB')[1])) {
-      this.config.colorB = newConfig.colorB
-    }
     if (reInit) this.init()
   }
 
@@ -136,9 +125,9 @@ exports.class = class FullRandom extends Template {
 
   update () {
 
-    if (Math.random() > this.getConfig('probability')) return
+    if (Math.random() > Number(this.getConfig('probability'))) return
 
-    let fadeout = Array.isArray(this.getConfig('fadeout')) ? this.randomMinMax(this.getConfig('fadeout')[0], this.getConfig('fadeout')[1]) : this.getConfig('fadeout')
+    let fadeout = Array.isArray(this.getConfig('fadeout')) ? this.randomMinMax(Number(this.getConfig('fadeout')[0]), Number(this.getConfig('fadeout')[1])) : Number(this.getConfig('fadeout'))
     let x = Math.round(Math.random()*(this.width - 1))
     let y = Math.round(Math.random()*(this.height - 1))
 
@@ -153,16 +142,16 @@ exports.class = class FullRandom extends Template {
 
   getRedColor () {
     let color = this.getConfig('colorR')
-    return Array.isArray(color) ? this.randomMinMax(color[0], color[1]) : color
+    return Array.isArray(color) ? this.randomMinMax(Number(color[0]), Number(color[1])) : Number(color)
   }
 
   getGreenColor () {
     let color = this.getConfig('colorG')
-    return Array.isArray(color) ? this.randomMinMax(color[0], color[1]) : color
+    return Array.isArray(color) ? this.randomMinMax(Number(color[0]), Number(color[1])) : Number(color)
   }
 
   getBlueColor () {
     let color = this.getConfig('colorB')
-    return Array.isArray(color) ? this.randomMinMax(color[0], color[1]) : color
+    return Array.isArray(color) ? this.randomMinMax(Number(color[0]), Number(color[1])) : Number(color)
   }
 } 

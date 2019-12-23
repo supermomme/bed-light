@@ -33,11 +33,11 @@ module.exports = class Template {
     return matrix
   }
 
-  setConfig (newConfig) {
-    if (Number(newConfig.fps) != undefined && Number(newConfig.fps) !== this.getConfig('fps')) {
-      this.config.fps = Number(newConfig.fps)
-      this.init()
+  setConfig (newConfig = {}) {
+    for (const key in newConfig) {
+      this.config[key] = newConfig[key]
     }
+    if (newConfig.fps != undefined && newConfig.fps !== this.getConfig('fps')) this.init()
   }
 
   getConfig (conf) {
@@ -45,6 +45,7 @@ module.exports = class Template {
   }
 
   getWholeConfig () {
+    // console.log(this.config)
     let con = {}
     for (const key in this.defaultConfig) {
       con[key] = this.defaultConfig[key]

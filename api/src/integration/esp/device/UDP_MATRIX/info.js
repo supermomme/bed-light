@@ -23,5 +23,25 @@ module.exports.settingComponents = [
     label: 'Transition Time',
     min: 0
   },
+  {
+    key: 'coverage',
+    label: 'Coverage',
+    tooltip: 'Where is it lit up?',
+    type: 'SELECT',
+    selectable: [
+      { text: 'All', value: 'A' },
+      { text: 'All-Right', value: 'AR' },
+      { text: 'All-Left', value: 'AL' },
+      { text: 'All-Top', value: 'AT' },
+      { text: 'All-Middle', value: 'AM' },
+      { text: 'All-Bottom', value: 'AB' },
+      { text: 'Top-Right', value: 'TR' },
+      { text: 'Top-Left', value: 'TL' },
+      { text: 'Middle-Right', value: 'MR' },
+      { text: 'Middle-Left', value: 'ML' },
+      { text: 'Bottom-Right', value: 'BR' },
+      { text: 'Bottom-Left', value: 'BL' }
+    ]
+  },
   ...settingComponents
 ]

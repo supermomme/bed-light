@@ -27,6 +27,7 @@ module.exports = class Matrix {
     this.modes = {}
     for (const key in Modes) {
       let mode = new Modes[key](this.width, this.height)
+      mode.setConfig(dbDevice.setting[key])
       let alpha = 0
       if (dbDevice.state.alpha && dbDevice.state.alpha[key]) alpha = dbDevice.state.alpha[key]
       this.modes[key] = { mode, alpha }
@@ -41,6 +42,7 @@ module.exports = class Matrix {
     this.updateInterval = setInterval(() => this.send(), 1000/60)
     this.alphaTransitionInterval = setInterval(() => this.updateAlphaTransistions(), 10)
     this.alphaTransistions = []
+    this.coverage = dbDevice.setting.coverage || 'A'
 
     let settingPatch = Object.keys(defaultSetting).reduce((prev, cur) => {
       prev[`setting.${cur}`] = defaultSetting[cur]
@@ -54,7 +56,8 @@ module.exports = class Matrix {
       statusMessage: 'Connected! All good.',
       'state.alpha': alpha,
       'state.isInTransition': false,
-      ...settingPatch
+      ...settingPatch,
+      'setting.coverage': this.coverage
     })
 
     this.app.service('device').on('patched', (data) => this.handlePatch(data).catch(logger.error))
@@ -81,6 +84,8 @@ module.exports = class Matrix {
         this.modes[modeId].mode.setConfig(data.setting[modeId])
       }
     }
+
+    this.coverage = data.setting.coverage
   }
 
   isTransitioning () {
@@ -137,6 +142,19 @@ module.exports = class Matrix {
       }
     })
   }
+  
+  getAlphaByPos (x, y) {
+    let alpha = 0
+    // IMPROVEMENT: use an alpha matrix in each mode (this.mode[modeId].alphaMatrix = [[0,0,1,0.5,...],...])
+    if (this.isTopRightLitUp() && y < this.height/3 && x >= this.width/2) alpha = 1 // top right
+    if (this.isTopLeftLitUp() && y < this.height/3 && x < this.width/2) alpha = 1 // top left
+    if (this.isMiddleRightLitUp() && this.height/3 <= y && y < (this.height/3)*2 && x >= this.width/2) alpha = 1 // middle right
+    if (this.isMiddleLeftLitUp() && this.height/3 <= y && y < (this.height/3)*2 && x < this.width/2) alpha = 1 // middle left
+    if (this.isBottomRightLitUp() && (this.height/3)*2 <= y && x >= this.width/2) alpha = 1 // bottom right
+    if (this.isBottomLeftLitUp() && (this.height/3)*2 <= y && x < this.width/2) alpha = 1 // bottom left
+
+    return alpha
+  }
 
   pixelsToSend () {
     // Init and fill newMatrix
@@ -165,7 +183,7 @@ module.exports = class Matrix {
               r: matrix[x][y].r || 0,
               g: matrix[x][y].g || 0,
               b: matrix[x][y].b || 0,
-              a: matrix[x][y].a*alpha || 0
+              a: matrix[x][y].a*alpha*this.getAlphaByPos(x, y) || 0
             }
             let color = this.colorBlend(background, foreground)
             if (!isNaN(color.r) && !isNaN(color.g) && !isNaN(color.b) && !isNaN(color.a)) newMatrix[x][y] = color
@@ -198,5 +216,65 @@ module.exports = class Matrix {
   destroy () {
     clearInterval(this.updateInterval)
     this.udpSocket.close()
+  }
+
+  isTopRightLitUp () {
+    if (
+      this.coverage == 'A' ||
+      this.coverage == 'AR' ||
+      this.coverage == 'AT' ||
+      this.coverage == 'TR'
+    ) return true
+    else return false
+  }
+
+  isTopLeftLitUp () {
+    if (
+      this.coverage == 'A' ||
+      this.coverage == 'AL' ||
+      this.coverage == 'AT' ||
+      this.coverage == 'TL'
+    ) return true
+    else return false
+  }
+
+  isMiddleRightLitUp () {
+    if (
+      this.coverage == 'A' ||
+      this.coverage == 'AR' ||
+      this.coverage == 'AM' ||
+      this.coverage == 'MR'
+    ) return true
+    else return false
+  }
+
+  isMiddleLeftLitUp () {
+    if (
+      this.coverage == 'A' ||
+      this.coverage == 'AL' ||
+      this.coverage == 'AM' ||
+      this.coverage == 'ML'
+    ) return true
+    else return false
+  }
+
+  isBottomRightLitUp () {
+    if (
+      this.coverage == 'A' ||
+      this.coverage == 'AR' ||
+      this.coverage == 'AB' ||
+      this.coverage == 'BR'
+    ) return true
+    else return false
+  }
+
+  isBottomLeftLitUp () {
+    if (
+      this.coverage == 'A' ||
+      this.coverage == 'AL' ||
+      this.coverage == 'AB' ||
+      this.coverage == 'BL'
+    ) return true
+    else return false
   }
 }

@@ -41,7 +41,6 @@ exports.class = class FullRainbow extends Template {
   setConfig (newConfig) {
     let reInit = false
     super.setConfig(newConfig)
-    if (Number(newConfig.cycleTime) && Number(newConfig.cycleTime) !== this.getConfig('cycleTime')) this.config.cycleTime = Number(newConfig.cycleTime)
     if (reInit) this.init()
   }
 
@@ -65,7 +64,7 @@ exports.class = class FullRainbow extends Template {
   }
 
   update () {
-    this.cyclePos += 1 / (this.getConfig('fps') * (this.getConfig('cycleTime') / 1000))
+    this.cyclePos += 1 / (Number(this.getConfig('fps')) * (Number(this.getConfig('cycleTime')) / 1000))
     if (this.cyclePos >= 1) this.cyclePos = 0
   }
 }

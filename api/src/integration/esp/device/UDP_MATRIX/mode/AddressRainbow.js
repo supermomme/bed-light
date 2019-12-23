@@ -55,15 +55,10 @@ exports.class = class AddressRainbow extends Template {
     this.init()
   }
 
-  setConfig (newConfig) {
+  setConfig (newConfig = {}) {
     let reInit = false
+    if (newConfig.direction && newConfig.direction !== this.getConfig('direction')) reInit = true
     super.setConfig(newConfig)
-    if (Number(newConfig.cycleTime) && Number(newConfig.cycleTime) !== this.getConfig('cycleTime')) this.config.cycleTime = Number(newConfig.cycleTime)
-    if (Number(newConfig.shift) && Number(newConfig.shift) !== this.getConfig('shift')) this.config.shift = Number(newConfig.shift)
-    if (newConfig.direction && newConfig.direction !== this.getConfig('direction')) {
-      this.config.direction = newConfig.direction
-      reInit = true
-    }
     if (reInit) this.init()
   }
 
@@ -81,12 +76,12 @@ exports.class = class AddressRainbow extends Template {
 
   update () {
     if (this.getConfig('direction').toUpperCase() === 'Y') {
-      this.p += 1 / (this.getConfig('fps') * (this.getConfig('cycleTime') / 1000))
+      this.p += 1 / (Number(this.getConfig('fps')) * (Number(this.getConfig('cycleTime')) / 1000))
       if (this.p >= 1) this.p = 0
 
       let { r, g, b } = this.hslToRgb(this.p, 1, 0.5)
       for (let x = 0; x < this.width; x++) {
-        if (this.getConfig('shift') > 0)
+        if (Number(this.getConfig('shift')) > 0)
           this.matrix[x][0] = { r, g, b, a: 1 }
         else
           this.matrix[x][this.height-1] = { r, g, b, a: 1 }
@@ -96,7 +91,7 @@ exports.class = class AddressRainbow extends Template {
   }
 
   shiftY() {
-    let shift = this.getConfig('shift')
+    let shift = Number(this.getConfig('shift'))
 
     for (let x = 0; x < this.width; x++) {
       if (shift > 0) {
