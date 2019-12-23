@@ -1,11 +1,15 @@
+// NOTE: TCP is slow in nodejs
 const logger = require('../../../../logger')
 const Modes = require('./mode')
 const colorBlend = require('color-blend')
 
 module.exports = class Matrix {
-  constructor (deviceId, socket, app, dbDevice) {
+  constructor (deviceId, integration, app, dbDevice) {
     this.id = deviceId.toString()
-    this.socket = socket
+    this.integration = integration
+    this.name = dbDevice.deviceName
+    this.udpHost = dbDevice.config.HOST
+    this.udpPort = dbDevice.config.PORT
     this.app = app
 
     this.width = dbDevice.config.WIDTH
@@ -44,12 +48,14 @@ module.exports = class Matrix {
       state: { alpha }
     })
 
-    this.updateInterval = setInterval(() => this.send(), 1000/0.5)
+    this.hasPongArrived = true
+    this.pongMissedCount = 0
+    this.updateInterval = setInterval(() => this.send(), 1000/1)
   }
 
   async handlePatch (data) {
     for (const modeId in data.state.alpha) {
-      const alpha = data.state.alpha[modeId];
+      const alpha = data.state.alpha[modeId]
       if (this.modes[modeId].alpha !== alpha) this.modes[modeId].alpha = alpha
     }
   }
@@ -69,7 +75,7 @@ module.exports = class Matrix {
     } else {
       pixelsToSend = this.pixelsToSend()
     }
-    
+    // if (pixelsToSend.length === 0) return
     // pixelsToSend
     let stringToSend = ''
     for (let i = 0; i < pixelsToSend.length; i++) {
@@ -78,7 +84,14 @@ module.exports = class Matrix {
       stringToSend += `X=${x}#Y=${y}#R=${r*a}#G=${g*a}#B=${b*a};`
     }
     stringToSend = stringToSend.slice(0, -1)
-    this.socket.write(`UPDATE:${stringToSend}\n`)
+    stringToSend = `UPDATE:${stringToSend}`
+    console.log(stringToSend)
+    this.integration.udp.send(Buffer.from(stringToSend), Number(this.udpPort), this.udpHost, (error, bytes) => {
+      if (error) {
+        logger.error(error)
+      }
+    })
+    
   }
 
   pixelsToSend () {
@@ -99,7 +112,6 @@ module.exports = class Matrix {
           const matrix = mode.mode.getMatrix()
           for (let x = 0; x < matrix.length; x++) {
             for (let y = 0; y < matrix[x].length; y++) {
-              let a = matrix[x][y].a*alpha
               let background = {
                 r: newMatrix[x][y].r || 0,
                 g: newMatrix[x][y].g || 0,
@@ -143,6 +155,11 @@ module.exports = class Matrix {
 
   destroy () {
     clearInterval(this.updateInterval)
-    this.socket.destroy()
+    clearInterval(this.pingInterval)
+    this.app.service('device').patch(this.id, {
+      status: 'DISCONNECTED',
+      statusMessage: 'Device is disconnected'
+    })
+    delete this.integration.device[this.id]
   }
 }

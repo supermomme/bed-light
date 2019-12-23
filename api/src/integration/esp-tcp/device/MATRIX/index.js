@@ -1,0 +1,149 @@
+// NOTE: TCP is slow in nodejs
+const logger = require('../../../../logger')
+const Modes = require('./mode')
+const colorBlend = require('color-blend')
+
+module.exports = class Matrix {
+  constructor (deviceId, socket, app, dbDevice) {
+    this.id = deviceId.toString()
+    this.socket = socket
+    this.app = app
+
+    this.width = dbDevice.config.WIDTH
+    this.height = dbDevice.config.HEIGHT
+    this.matrix = []
+    for (let x = 0; x < this.width; x++) {
+      let column = []
+      for (let y = 0; y < this.height; y++) {
+        column.push({ r: 0, g: 0, b: 0, a: 0 })
+      }
+      this.matrix.push(column)
+    }
+
+    this.modes = {}
+    this.trans
+    for (const key in Modes) {
+      let mode = new Modes[key](this.width, this.height)
+      let alpha = 0
+      if (dbDevice.state.alpha && dbDevice.state.alpha[key]) alpha = dbDevice.state.alpha[key]
+      this.modes[key] = {
+        mode,
+        alpha
+      }
+    }
+
+    this.app.service('device').on('patched', (data) => this.handlePatch(data).catch(logger.error))
+    this.app.service('device').on('updated', (data) => this.handlePatch(data).catch(logger.error))
+
+    let alpha = {}
+    for (const modeId in this.modes) {
+      alpha[modeId] = this.modes[modeId].alpha
+    }
+    this.app.service('device').patch(this.id, {
+      status: 'CONNECTED',
+      statusMessage: 'Connected! All good.',
+      state: { alpha }
+    })
+
+    this.updateInterval = setInterval(() => this.send(), 1000/0.5)
+  }
+
+  async handlePatch (data) {
+    for (const modeId in data.state.alpha) {
+      const alpha = data.state.alpha[modeId];
+      if (this.modes[modeId].alpha !== alpha) this.modes[modeId].alpha = alpha
+    }
+  }
+
+  colorBlend (A, B) {
+    return colorBlend.normal(A, B)
+  }
+
+  send (sendAll = false) {
+    let pixelsToSend = []
+    if (sendAll) {
+      for (let x = 0; x < this.width; x++) {
+        for (let y = 0; y < this.height; y++) {
+          pixelsToSend.push({x,y})
+        }
+      }
+    } else {
+      pixelsToSend = this.pixelsToSend()
+    }
+    
+    // pixelsToSend
+    let stringToSend = ''
+    for (let i = 0; i < pixelsToSend.length; i++) {
+      let { x, y } = pixelsToSend[i]
+      const { r, g, b, a } = this.matrix[x][y]
+      stringToSend += `X=${x}#Y=${y}#R=${r*a}#G=${g*a}#B=${b*a};`
+    }
+    stringToSend = stringToSend.slice(0, -1)
+    this.socket.write(`UPDATE:${stringToSend}\n`)
+  }
+
+  pixelsToSend () {
+    // Init and fill newMatrix
+    let newMatrix = []
+    for (let x = 0; x < this.width; x++) {
+      let column = []
+      for (let y = 0; y < this.height; y++) {
+        column.push({ r: 0, g: 0, b: 0, a: 0 })
+      }
+      newMatrix.push(column)
+    }
+    for (const modeId in this.modes) {
+      if (this.modes.hasOwnProperty(modeId)) {
+        const mode = this.modes[modeId]
+        const alpha = mode.alpha
+        if (alpha > 0 && mode.mode.initialized) {
+          const matrix = mode.mode.getMatrix()
+          for (let x = 0; x < matrix.length; x++) {
+            for (let y = 0; y < matrix[x].length; y++) {
+              let a = matrix[x][y].a*alpha
+              let background = {
+                r: newMatrix[x][y].r || 0,
+                g: newMatrix[x][y].g || 0,
+                b: newMatrix[x][y].b || 0,
+                a: newMatrix[x][y].a || 0
+              }
+              let foreground = {
+                r: matrix[x][y].r || 0,
+                g: matrix[x][y].g || 0,
+                b: matrix[x][y].b || 0,
+                a: matrix[x][y].a*alpha || 0
+              }
+              let color = this.colorBlend(background, foreground)
+              if (!isNaN(color.r) && !isNaN(color.g) && !isNaN(color.b) && !isNaN(color.a)) newMatrix[x][y] = color
+            }
+          }
+        }
+      }
+    }
+
+    // Register pixels to send
+    let pixelsToSend = []
+    for (let x = 0; x < newMatrix.length; x++) {
+      for (let y = 0; y < newMatrix[x].length; y++) {
+        if (
+          newMatrix[x][y].r !== this.matrix[x][y].r ||
+          newMatrix[x][y].g !== this.matrix[x][y].g ||
+          newMatrix[x][y].b !== this.matrix[x][y].b ||
+          newMatrix[x][y].a !== this.matrix[x][y].a
+        ) {
+          let index = pixelsToSend.findIndex(n => n.x === x && n.y === y)
+          if (index === -1) pixelsToSend.push({ x, y })
+        }
+      }
+    }
+
+    // Set this.matrix to newMatrix
+    this.matrix = newMatrix
+    return pixelsToSend
+  }
+
+  destroy () {
+    clearInterval(this.updateInterval)
+    this.socket.destroy()
+  }
+}

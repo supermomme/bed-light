@@ -40,7 +40,7 @@
               <v-alert :type="errorType(device.status)" v-if="device.status != 'CONNECTED'" prominent>
                 {{ device.statusMessage }}
               </v-alert>
-              <pre>{{ device}}</pre>
+              <!--<pre>{{ device}}</pre>-->
             </v-card-text>
           </v-list-item-content>
         </v-list-item>
