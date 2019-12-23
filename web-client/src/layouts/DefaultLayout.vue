@@ -54,6 +54,9 @@ export default {
     }
   },
   created () {
+    this.drawer = !this.$vuetify.breakpoint.mdAndDown
+
+    // mdAndDown
     this.$vuetify.theme.dark = true
   }
 }

@@ -27,7 +27,6 @@ services:
       - NODE_ENV=docker
     ports:
       - 33333:33333/tcp
-      - 33334:33334/tcp
   mongo:
     image: mongo:3.6
     container_name: mongo

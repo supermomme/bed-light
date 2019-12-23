@@ -4,8 +4,8 @@
  * Repo: https://github.com/supermomme/home-control
  * Platform: ESP8266-01
  * Pins:
- * 
- * DISCLAYMER: This is just a test and will be update for intended usage
+ * 0 - Relay (for light)
+ * 3 - wall switch
 */
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
@@ -14,7 +14,6 @@
 const char* ssid = "Test";
 const char* password = "TeStTeSt";
 
-WiFiServer server(80);
 IPAddress ip(10,0,80,22);
 IPAddress gateway(10,0,0,1);
 IPAddress subnet(255,255,0,0);
@@ -24,6 +23,7 @@ const uint16_t port = 33333;
 
 String configString = "TYPE=LIGHT_SWITCH;NAME=MainLight";
 int retryCountDown = 0;
+bool lastSwitchState = false;
 
 WiFiClient client;
 
@@ -41,23 +41,30 @@ void setup() {
   }
   Serial.println(" connected");
 
-  server.begin();
   Serial.printf("Connected to WiFi with IP %s\n", WiFi.localIP().toString().c_str());
-}
 
-bool light = false;
-int countDown = 10000;
+  pinMode(3, INPUT_PULLUP);
+  pinMode(0, OUTPUT);
+}
 
 void loop() {
 
   // TODO: check switch instead of countdown
   // set output and send UPDATE
+  /*
   countDown--;
   if (countDown <= 0) {
     countDown = 15000;
     light = !light;
     if (client.connected()) client.print("UPDATE:ENABLE="+(String)(light ? "1" : "0"));
     Serial.println(light);
+  }
+  */
+  if (lastSwitchState != digitalRead(3)) {
+    lastSwitchState = digitalRead(3);
+    bool newState = !digitalRead(0);
+    client.print("UPDATE:ENABLE="+(String)(newState ? "0" : "1"));
+    digitalWrite(0, newState);
   }
 
   if (client.connected()) {
@@ -78,7 +85,6 @@ void loop() {
           else newState = newState.substring(endOfVar+1);
           
           // extract key val out of toInspect
-          // TODO: if has # use other method
           int eqIndex = toInspect.indexOf("=");
           String key = toInspect.substring(0, eqIndex);
           String val = toInspect.substring(eqIndex+1, endOfVar);
@@ -86,14 +92,13 @@ void loop() {
           // handle key val (for light)
           if (key == "ENABLE") {
             // TODO: switch output instead of var
-            light = (val == "1");
+            digitalWrite(0, (val == "0"));
           }
-          Serial.println(light);
           
         }
       } else if (payload == "REQ_UPDATE") {
         // READ OUTPUT instead of light
-        client.print("UPDATE:ENABLE="+(String)(light ? "1" : "0"));
+        client.print("UPDATE:ENABLE="+(String)(digitalRead(0) ? "0" : "1"));
       }
     }
   } else {

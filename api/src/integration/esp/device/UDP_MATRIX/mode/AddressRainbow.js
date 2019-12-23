@@ -1,7 +1,46 @@
 const Template = require('./_Template')
 
+exports.settingComponents = [
+  { type: 'SPACER', key: 'Spacer for AddressRainbow' },
+  { type: 'HEAD', label: 'Address Rainbow', key: 'HEAD for AddressRainbow' },
+  {
+    key: 'AddressRainbow.fps',
+    label: 'FPS',
+    tooltip: 'frames per second',
+    type: 'NUMBER'
+  },
+  {
+    key: 'AddressRainbow.cycleTime',
+    label: 'Cycle Time',
+    tooltip: 'Cycle Time in milliseconds',
+    type: 'NUMBER',
+  },
+  {
+    key: 'AddressRainbow.shift',
+    label: 'Shift',
+    tooltip: 'Pixels to shift',
+    type: 'NUMBER'
+  },
+  {
+    key: 'AddressRainbow.direction',
+    label: 'Direction',
+    tooltip: 'direction of pattern and of shift',
+    type: 'SELECT',
+    selectable: [
+      { text: 'Y-Axis', value: 'Y' }
+      // { text: 'X-Axis', value: 'X' } // Not implemented yet
+    ]
+  }
+]
 
-module.exports = class AddressRainbow extends Template {
+exports.defaultSetting = {
+  'AddressRainbow.fps': 10,
+  'AddressRainbow.cycleTime': 10000,
+  'AddressRainbow.shift': 1,
+  'AddressRainbow.direction': 'Y'
+}
+
+exports.class = class AddressRainbow extends Template {
   constructor(_width, _height, _config) {
     super(_width, _height, _config)
     this.Info = exports.Info
@@ -18,25 +57,24 @@ module.exports = class AddressRainbow extends Template {
 
   setConfig (newConfig) {
     let reInit = false
-    if (newConfig.direction && newConfig.direction !== this.getConfig(newConfig.direction)) reInit = true
     super.setConfig(newConfig)
+    if (Number(newConfig.cycleTime) && Number(newConfig.cycleTime) !== this.getConfig('cycleTime')) this.config.cycleTime = Number(newConfig.cycleTime)
+    if (Number(newConfig.shift) && Number(newConfig.shift) !== this.getConfig('shift')) this.config.shift = Number(newConfig.shift)
+    if (newConfig.direction && newConfig.direction !== this.getConfig('direction')) {
+      this.config.direction = newConfig.direction
+      reInit = true
+    }
     if (reInit) this.init()
   }
 
   getMatrix () {
+    if (!this.initialized) return this.getEmptyMatrix()
     return this.matrix
   }
 
   init() {
     this.destroy()
-
-    for (let x = 0; x < this.width; x++) {
-      let column = []
-      for (let y = 0; y < this.height; y++) {
-        column.push({ r: 0, g: 0, b: 0, a: 0 })
-      }
-      this.matrix.push(column)
-    }
+    this.matrix = this.getEmptyMatrix()
     this.p = 0
     super.init()
   }

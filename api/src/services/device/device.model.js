@@ -11,6 +11,7 @@ module.exports = function (app) {
     type: { type: String, required: true }, // should only be writte by integration-class
     state: { type: Schema.Types.Mixed, default: {} }, // can be overwritten by enduser
     config: { type: Schema.Types.Mixed, default: {} }, // should only be writte by integration-class
+    setting: { type: Schema.Types.Mixed, default: {} }, // can be overwritte by enduser
     status: { type: String, default: 'UNKNOWN'}, // should only be writte by integration-class
     statusMessage: { type: String, default: 'Status is unkown' } // should only be writte by integration-class
   }, {

@@ -1,7 +1,7 @@
 const logger = require('../../../../logger')
 
 module.exports = class Light_Switch {
-  constructor (deviceId, socket, app) {
+  constructor (deviceId, socket, app, dbDevice) {
     this.id = deviceId
     this.socket = socket
     this.app = app
@@ -17,10 +17,12 @@ module.exports = class Light_Switch {
     this.app.service('device').on('patched', (data) => this.handlePatch(data).catch(logger.error))
     this.app.service('device').on('updated', (data) => this.handlePatch(data).catch(logger.error))
 
-    this.enable = false
+    this.enable = dbDevice.state.enable
+    this.destroyed = false
   }
 
   async handleData (chunk) {
+    if (this.destroyed) return
     if (chunk.toString().startsWith('UPDATE:')) {
       let data = chunk.toString().split(':')[1].split(';').reduce((prev, cur) => {
         let res = {}
@@ -29,15 +31,12 @@ module.exports = class Light_Switch {
       }, { })
 
       this.enable = data.ENABLE === '1'
-      await this.app.service('device').patch(this.id, {
-        state: {
-          enable: data.ENABLE === '1'
-        }
-      })
+      await this.app.service('device').patch(this.id, { 'state.enable': this.enable })
     }
   }
 
   async handlePatch (data) {
+    if (this.destroyed) return
     if (data.state.enable != this.enable) {
       this.enable = data.state.enable
       this.socket.write(`UPDATE:ENABLE=${this.enable ? '1': '0'}\n`)
@@ -45,6 +44,6 @@ module.exports = class Light_Switch {
   }
 
   destroy () {
-    this.socket.destroy()
+    this.destroyed = true
   }
 }

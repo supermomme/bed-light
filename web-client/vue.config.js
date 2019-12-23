@@ -11,5 +11,8 @@ module.exports = {
   transpileDependencies: [
     'vuetify',
     'feathers-vuex'
-  ]
+  ],
+  pwa: {
+    name: 'Home Control'
+  }
 }

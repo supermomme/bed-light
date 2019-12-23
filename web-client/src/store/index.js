@@ -23,7 +23,6 @@ export default new Vuex.Store({
   ],
   state: {
     isLoading: false,
-    sidebarOpened: true,
     dialog: null,
     dialogMeta: {}
   },
