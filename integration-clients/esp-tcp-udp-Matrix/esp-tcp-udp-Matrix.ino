@@ -20,7 +20,7 @@ IPAddress gateway(10,0,0,1);
 IPAddress subnet(255,255,0,0);
 
 const char* host = "10.0.0.12";
-const uint16_t port = 33334;
+const uint16_t port = 33333;
 unsigned int localUdpPort = 33333;
 
 char configString[] = "CONF:TYPE=UDP_MATRIX;NAME=Bed;WIDTH=2;HEIGHT=60;HOST=10.0.80.23;PORT=33333";
@@ -59,6 +59,7 @@ void setup() {
 void loop() {
   if (client.connected()) {
     if (client.available() > 0) {
+      String payload = client.readStringUntil('\n');
       if (payload == "REQ_CONF") {
         client.print(configString);
       } else if (payload == "PING") {
@@ -71,7 +72,7 @@ void loop() {
       byte packet[packetSize];
       Udp.readBytes(packet, packetSize);
       if (packetSize/5.0 == packetSize/5) {
-        //Serial.println("Got good Package");
+        // Serial.println("Got good Package");
         bool updateStrip0 = false;
         bool updateStrip1 = false;
         for (int i=1; i<=packetSize/5; i++) {
@@ -127,6 +128,8 @@ void loop() {
         Serial.println("Connection failed! Retry in 10 seconds");
         retryCountDown = 10000;
 
+        strip0.clear();
+        strip1.clear();
         strip0.setPixelColor(3, 255, 0, 0);
         strip1.setPixelColor(3, 255, 0, 0);
         strip0.show();
