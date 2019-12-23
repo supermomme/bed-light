@@ -57,6 +57,7 @@ void setup() {
 }
 
 void loop() {
+  /*
   if(Udp.parsePacket()) {
     String payload = Udp.readStringUntil('\n');
     if (payload.startsWith("UPDATE")) {
@@ -97,7 +98,7 @@ void loop() {
           
           if(X != -1 && Y != -1 && R != -1 && G != -1 && B != -1) {
             
-            /*
+            
             Serial.print("X: ");
             Serial.print(X);
             Serial.print(" Y: ");
@@ -109,7 +110,7 @@ void loop() {
             Serial.print(" B: ");
             Serial.print(B);
             Serial.println();
-            */
+            
 
             if (X == 0) {
               strip0.setPixelColor(Y, R, G, B);
@@ -127,12 +128,52 @@ void loop() {
       if (updateStrip1) strip1.show();
     }
   }
+  */
+  int packetSize = Udp.parsePacket();
+  if (packetSize) {
+    byte packet[packetSize];
+    Udp.readBytes(packet, packetSize);
+    if (packetSize/5.0 == packetSize/5) {
+      //Serial.println("Got good Package");
+      bool updateStrip0 = false;
+      bool updateStrip1 = false;
+      for (int i=1; i<=packetSize/5; i++) {
+        /*
+        Serial.print(i);
+        Serial.print(" Strip: ");
+        Serial.print(packet[i*5-5], HEX);
+        Serial.print(" Addr: ");
+        Serial.print(packet[i*5-4], HEX);
+        Serial.print(" R: ");
+        Serial.print(packet[i*5-3], HEX);
+        Serial.print(" G: ");
+        Serial.print(packet[i*5-2], HEX);
+        Serial.print(" B: ");
+        Serial.print(packet[i*5-1], HEX);
+        Serial.println();
+        */
+        if (packet[i*5-5] == 0x00) {
+          strip0.setPixelColor(packet[i*5-4], packet[i*5-3], packet[i*5-2], packet[i*5-1]);
+          updateStrip0 = true;
+          
+        } else if (packet[i*5-5] == 0x01) {
+          strip1.setPixelColor(packet[i*5-4], packet[i*5-3], packet[i*5-2], packet[i*5-1]);
+          updateStrip1 = true;
+        }
+      }
+      if (updateStrip0) strip0.show();
+      if (updateStrip1) strip1.show();
+    } else {
+      Serial.println("Got bad Package!");
+    }
+    // Udp.endPacket();
+  }
 
   if (resendConfigCountDown <= 0) {
     Udp.beginPacket(host, port);
     Udp.write(configString);
     Udp.endPacket();
-    resendConfigCountDown = 120000;
+    resendConfigCountDown = 30000;
   } else {
     resendConfigCountDown--;
   }
