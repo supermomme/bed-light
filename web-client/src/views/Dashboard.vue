@@ -16,7 +16,12 @@
             </v-list-item-title>
             <v-card-text>
               <div v-for="component in device.frontendComponents" :key="component.key">
-                <template v-if="component.type === 'SWITCH'">
+                <template v-if="component.type === 'DISPLAY' && component.key === '*'">
+                  <p v-for="(info, index) in device.state" :key="info">
+                    {{ index }}: {{ info }}
+                  </p>
+                </template>
+                <template v-else-if="component.type === 'SWITCH'">
                   {{ device.state[component.key] == true }}
                   <v-switch
                     :input-value="component.key.split('.').reduce((o, v) => o[v], device.state)"

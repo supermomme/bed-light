@@ -146,6 +146,7 @@ module.exports = class Matrix {
   getAlphaByPos (x, y) {
     let alpha = 0
     // IMPROVEMENT: use an alpha matrix in each mode (this.mode[modeId].alphaMatrix = [[0,0,1,0.5,...],...])
+    // Maybe add position dialog in client
     if (this.isTopRightLitUp() && y < this.height/3 && x >= this.width/2) alpha = 1 // top right
     if (this.isTopLeftLitUp() && y < this.height/3 && x < this.width/2) alpha = 1 // top left
     if (this.isMiddleRightLitUp() && this.height/3 <= y && y < (this.height/3)*2 && x >= this.width/2) alpha = 1 // middle right
