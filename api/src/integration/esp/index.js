@@ -103,7 +103,7 @@ module.exports = class Integration {
       socket.write('PING\n')
       if (!pongArrived) pongNotArrivedTrain += 1
       else pongNotArrivedTrain = 0
-      if (pongNotArrivedTrain > 2) {
+      if (pongNotArrivedTrain > 3) {
         socket.destroy()
       }
       pongArrived = false

@@ -14,7 +14,7 @@ module.exports = class Light_Switch {
       statusMessage: 'Connected! All good.'
     })
 
-    this.patchHandler = (data) => { if (data._id === this.id)  this.handlePatch(data).catch(logger.error)}
+    this.patchHandler = (data) => { if (data._id.toString() === this.id.toString()) this.handlePatch(data).catch(logger.error) }
     this.app.service('device').on('patched', this.patchHandler)
     this.app.service('device').on('updated', this.patchHandler)
 

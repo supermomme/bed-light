@@ -6,7 +6,7 @@ const Ramp = require('ramp.js')
 
 module.exports = class Matrix {
   constructor (deviceId, _socket, app, dbDevice) {
-    this.id = deviceId.toString()
+    this.id = deviceId
     this.app = app
     this.udpSocket = dgram.createSocket('udp4')
 
@@ -60,7 +60,7 @@ module.exports = class Matrix {
       'setting.coverage': this.coverage
     })
 
-    this.patchHandler = (data) => { if (data._id === this.id)  this.handlePatch(data).catch(logger.error)}
+    this.patchHandler = (data) => { if (data._id.toString() === this.id.toString()) this.handlePatch(data).catch(logger.error) }
     this.app.service('device').on('patched', this.patchHandler)
     this.app.service('device').on('updated', this.patchHandler)
   }
@@ -137,7 +137,7 @@ module.exports = class Matrix {
       buffer.writeUInt8(b*a, base+4) // B
     }
     
-    this.udpSocket.send(buffer, Number(this.udpPort), this.udpHost, (error, bytes) => {
+    this.udpSocket.send(buffer, Number(this.udpPort), this.udpHost, (error) => { // IMPROVEMENT: use second param (bytes) for statistics
       if (error) {
         logger.error(error)
       }

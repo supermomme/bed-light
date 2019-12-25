@@ -27,14 +27,14 @@ exports.class = class FullRainbow extends Template {
     super(_width, _height, _config)
 
     this.defaultConfig.cycleTime = 120000
-    this.cyclePos = 0
+    this.cyclePos = .83
 
     this.init()
   }
 
   init() {
     this.destroy()
-    this.cyclePos = 0
+    this.cyclePos = .83
     super.init(true)
   }
 
