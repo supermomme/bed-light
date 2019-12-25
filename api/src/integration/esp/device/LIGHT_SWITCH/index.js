@@ -14,8 +14,9 @@ module.exports = class Light_Switch {
       statusMessage: 'Connected! All good.'
     })
 
-    this.app.service('device').on('patched', (data) => this.handlePatch(data).catch(logger.error))
-    this.app.service('device').on('updated', (data) => this.handlePatch(data).catch(logger.error))
+    this.patchHandler = (data) => { if (data._id === this.id)  this.handlePatch(data).catch(logger.error)}
+    this.app.service('device').on('patched', this.patchHandler)
+    this.app.service('device').on('updated', this.patchHandler)
 
     this.enable = dbDevice.state.enable
     this.destroyed = false
@@ -45,5 +46,7 @@ module.exports = class Light_Switch {
 
   destroy () {
     this.destroyed = true
+    this.app.service('device').removeListener('patched', this.patchHandler)
+    this.app.service('device').removeListener('updated', this.patchHandler)
   }
 }

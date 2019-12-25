@@ -14,9 +14,6 @@ module.exports = class Sensor {
       statusMessage: 'Connected! All good.'
     })
 
-    this.app.service('device').on('patched', (data) => this.handlePatch(data).catch(logger.error))
-    this.app.service('device').on('updated', (data) => this.handlePatch(data).catch(logger.error))
-
     this.enable = dbDevice.state.enable
     this.destroyed = false
   }
@@ -34,10 +31,6 @@ module.exports = class Sensor {
 
       await this.app.service('device').patch(this.id, data)
     }
-  }
-
-  async handlePatch () {
-    return
   }
 
   destroy () {
